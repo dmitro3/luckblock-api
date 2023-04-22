@@ -2,7 +2,6 @@ const fetch = require('node-fetch');
 const fs = require('fs');
 const childProcess = require('child_process');
 const { join } = require('path');
-const { watch } = require('fs/promises');
 
 const promisify = require('util').promisify;
 const writeFileAsync = promisify(fs.writeFile);
@@ -51,10 +50,11 @@ const generateAuditReport = async (contractId) => {
         if (path === join(rootDir, contractId, 'analysis.json')) {
             console.log(`analysis.json created in ${Date.now() - startDate}ms`);
             watcher.close();
+
+            const analysis = require(join(rootDir, contractId, 'analysis.json'));
         }
     });
 
-    console.log(`slither`, [mainFile, `--json`, `${join(rootDir, contractId, 'analysis')}.json`], join(rootDir, contractId, sourcesSubdir))
     childProcess.spawn(`slither`, [mainFile, `--json`, `${join('..', 'analysis')}.json`], {
         cwd: join(rootDir, contractId, sourcesSubdir)
     });
