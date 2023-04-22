@@ -1,0 +1,12 @@
+{
+  "name": "smart-contract-auditor-api",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/Androz2091/smart-contract-auditor-api.git",
+  "author": "Androz2091 <androz2091@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "chokidar": "^3.5.3",
+    "node-fetch": "2.6.6"
+  }
+}
