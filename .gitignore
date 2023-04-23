@@ -3,6 +3,13 @@ node_modules
 
 # pdf
 audit.pdf
+*.pdf
 
 # Analyses
 analyses
+
+# tests
+*.test.js
+
+# Keys
+.env
