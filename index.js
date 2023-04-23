@@ -64,7 +64,8 @@ const generateAuditReport = async (contractId) => {
         const mainFileName = await fs.readFileSync(join(__dirname, rootDir, contractId, 'main.txt'), 'utf-8');
         const mainFileContent = await fs.readFileSync(join(__dirname, rootDir, contractId, sourcesSubdir, mainFileName), 'utf-8');
         
-        const highDetectors = analysis.results.detectors.filter((detector) => (detector.confidence === 'High' || detector.confidence === 'Medium') && detector.impact === 'Medium');
+        const maxSuggestionCount = 2;
+        const highDetectors = analysis.results.detectors.filter((detector) => (detector.confidence === 'High' || detector.confidence === 'Medium') && (detector.impact === 'Medium' || detector.impact === 'High' || detector.impact === 'Low')).slice(0, maxSuggestionCount);
         const systemChatGptPrompt = "You are a AI robot designed to help to generate fixes for smart contracts. You will receive a function, an error, and always need to suggest an alternative code that works.\n\nYou must always trust the error and never question it in your explanation. Fix type must be 'contract security', 'trading security', 'bugs/logic issues' or 'optimization recommendations'. Your answer should be in the EXACT following format (re-send the whole function and follow the same prettier rules so we can show a code diff with your fixes, explained fix is max 320 characters).\n\nAlternative code:\n```solidity\n[replace with code]\n```\n\nExplained fix:\n```\n[replace with explanations]\n\n```Fix type:\n```\n[replace with fix type]\n```";
 
         const suggestions = [];
@@ -90,9 +91,9 @@ const generateAuditReport = async (contractId) => {
 
             const response = completion.data.choices[0].message;
             console.log(response.content);
-            const fixedCode = response.content.match(/Alternative code:\n```solidity([\s\S.]*?)```/)[1];
-            const explanation = response.content.match(/Explained fix:\n```([\s\S.]*?)```/)[1];
-            const fixType = response.content.match(/Fix type:\n```([\s\S.]*?)```/)[1];
+            const fixedCode = response.content.match(/Alternative code:\n```solidity([\s\S.]*?)```/)[1].trim();
+            const explanation = response.content.match(/Explained fix:\n```([\s\S.]*?)```/)[1].trim();
+            const fixType = response.content.match(/Fix type:\n```([\s\S.]*?)```/)[1].trim();
 
             console.log(fixedCode);
             console.log(explanation);
@@ -119,73 +120,118 @@ const generateAuditReport = async (contractId) => {
         const topOfPage = 650;
         const margin = 80;
 
-        let lastSuggestionEndedAt = topOfPage;
+        let lastSuggestionEndedAt = topOfPage - 10;
 
         const annots = [];
 
-        for (let i = 0; i < suggestions.length; i++) {
+        pages[0].drawText('Floki', {
+            size: 18,
+            x: 160,
+            y: 301,
+            maxWidth: 400,
+            lineHeight: 12,
+            font: obudaBoldFont
+        });
+    
+        pages[0].drawText('FLOKI', {
+            size: 18,
+            x: 180,
+            y: 262,
+            maxWidth: 400,
+            lineHeight: 12,
+            font: obudaBoldFont
+        });
+    
+        pages[0].drawText('0xcf0c122c6b73ff809c693db761e7baebe62b6a2e', {
+            size: 12,
+            x: 270,
+            y: 223,
+            maxWidth: 400,
+            lineHeight: 12,
+            font: obudaBoldFont
+        });
 
-            pages[2].drawText(`Detection #${i+1}`, {
-                size: 20,
-                x: margin,
-                y: lastSuggestionEndedAt - 40,
-                maxWidth: 400,
-                lineHeight: 12,
-                font: obudaBoldFont,
-                color: rgb(...[0, 24, 122].map((e) => e / 255))
-            });
-            lastSuggestionEndedAt = lastSuggestionEndedAt - 40;
+        const groupedSuggestions = suggestions.reduce((acc, suggestion) => {
+            if (!acc[suggestion.fixType]) acc[suggestion.fixType] = [];
+            acc[suggestion.fixType].push(suggestion);
+            return acc;
+        }, {});
 
-            pages[2].drawText(suggestions[i].content, {
-                size: 10,
-                x: margin,
-                y: lastSuggestionEndedAt - 30,
-                maxWidth: 400,
-                lineHeight: 12,
-                font: obudaFont
-            });
-            lastSuggestionEndedAt = lastSuggestionEndedAt - 30;
+        const pagePerFixType = {
+            'contract security': 2,
+            'trading security': 3,
+            'bugs/logic issues': 4,
+            'optimization recommendations': 5
+        };
 
-            const lines = breakTextIntoLines(suggestions[i].content, [' '], 400, (text) => obudaBoldFont.widthOfTextAtSize(text, 10));
-            const contentSize = lines.length * 14;
+        for (let fixType of Object.keys(groupedSuggestions)) {
 
-            pages[2].drawText('Click here for code changes', {
-                size: 15,
-                x: margin,
-                y: lastSuggestionEndedAt - 10 - contentSize,
-                maxWidth: 400,
-                lineHeight: 12,
-                font: obudaBoldFont
-            });
+            for (let i = 0; i < groupedSuggestions[fixType].length; i++) {
 
-            const diff = dmp.diff_main(suggestions[i].codes[0], suggestions[i].codes[1]);
-            const gzip = Buffer.from(
-                pako.gzip(
-                JSON.stringify({ diff, lhsLabel: 'previous_code.sol', rhsLabel: 'ai_fixed_code.sol' }))
-            ).toString('base64');
+                console.log(fixType, i, pagePerFixType[fixType]);
 
-            const pdfUrlDict = pdfDoc.context.obj({
-                Type: "Annot",
-                Subtype: "Link",
-                Rect: [margin - 5, lastSuggestionEndedAt - 10 - contentSize + 15, 300, lastSuggestionEndedAt - 10 - contentSize + 5 - 15],
-                A: {
-                    Type: "Action",
-                    S: "URI",
-                    URI: PDFString.of(`https://diffviewer.vercel.app/v1/diff#${gzip}`),
-                }
-            });
-            annots.push(pdfDoc.context.register(pdfUrlDict));
+                pages[pagePerFixType[fixType]].drawText(`Detection #${i+1}`, {
+                    size: 20,
+                    x: margin,
+                    y: lastSuggestionEndedAt - 40,
+                    maxWidth: 400,
+                    lineHeight: 12,
+                    font: obudaBoldFont,
+                    color: rgb(...[0, 24, 122].map((e) => e / 255))
+                });
+                lastSuggestionEndedAt = lastSuggestionEndedAt - 40;
 
-            lastSuggestionEndedAt = lastSuggestionEndedAt - 10 - contentSize;
-            lastSuggestionEndedAt = lastSuggestionEndedAt - 10;
+                pages[pagePerFixType[fixType]].drawText(groupedSuggestions[fixType][i].content, {
+                    size: 10,
+                    x: margin,
+                    y: lastSuggestionEndedAt - 30,
+                    maxWidth: 400,
+                    lineHeight: 12,
+                    font: obudaFont
+                });
+                lastSuggestionEndedAt = lastSuggestionEndedAt - 30;
 
+                const lines = breakTextIntoLines(groupedSuggestions[fixType][i].content, [' '], 400, (text) => obudaBoldFont.widthOfTextAtSize(text, 10));
+                const contentSize = lines.length * 14;
+
+                pages[pagePerFixType[fixType]].drawText('Click here for code changes', {
+                    size: 15,
+                    x: margin,
+                    y: lastSuggestionEndedAt - 10 - contentSize,
+                    maxWidth: 400,
+                    lineHeight: 12,
+                    font: obudaBoldFont
+                });
+
+                const diff = dmp.diff_main(groupedSuggestions[fixType][i].codes[0], groupedSuggestions[fixType][i].codes[1]);
+                const gzip = Buffer.from(
+                    pako.gzip(
+                    JSON.stringify({ diff, lhsLabel: 'previous_code.sol', rhsLabel: 'ai_fixed_code.sol' }))
+                ).toString('base64');
+
+                const pdfUrlDict = pdfDoc.context.obj({
+                    Type: "Annot",
+                    Subtype: "Link",
+                    Rect: [margin - 5, lastSuggestionEndedAt - 10 - contentSize + 15, 300, lastSuggestionEndedAt - 10 - contentSize + 5 - 15],
+                    A: {
+                        Type: "Action",
+                        S: "URI",
+                        URI: PDFString.of(`https://diffviewer.vercel.app/v1/diff#${gzip}`),
+                    }
+                });
+                annots.push(pdfDoc.context.register(pdfUrlDict));
+
+                lastSuggestionEndedAt = lastSuggestionEndedAt - 10 - contentSize;
+                lastSuggestionEndedAt = lastSuggestionEndedAt - 10;
+
+            }
+
+            pages[pagePerFixType[fixType]].node.set(PDFName.of("Annots"), pdfDoc.context.obj(annots));
+            
+            const pdfBytes = await pdfDoc.save();
+
+            return pdfBytes;
         }
-
-        pages[2].node.set(PDFName.of("Annots"), pdfDoc.context.obj(annots));
-        
-        const pdfBytes = await pdfDoc.save();
-
-        return pdfBytes;
     }
 
     if (!await existsAsync(rootDir)) await makeDirAsync(rootDir);
