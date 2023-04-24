@@ -37,7 +37,13 @@ const writeSourceCode = async (contractId) => {
     const res = await fetch(`https://api.etherscan.io/api?module=contract&action=getsourcecode&address=${contractId}`)
     const data = await res.json();
 
-    const sources = JSON.parse(data.result[0].SourceCode.slice(1, -1)).sources;
+    console.log(data);
+
+    const sources = data.result[0].SourceCode.startsWith('{{') ? JSON.parse(data.result[0].SourceCode.slice(1, -1)).sources : {
+        'main.sol': {
+            content: data.result[0].SourceCode
+        }
+    };
     if (!await existsAsync(join(rootDir, contractId))) await makeDirAsync(join(rootDir, contractId));
     if (!await existsAsync(join(rootDir, contractId, sourcesSubdir))) await makeDirAsync(join(rootDir, contractId, sourcesSubdir));
     for(let key in sources) {
