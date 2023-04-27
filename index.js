@@ -327,7 +327,7 @@ fastify.get('/audit/:contractId/status', async (request, reply) => {
 	reply.send({ status: status || 'unknown' });
 });
 
-fastify.get('/audit/:contractId/report', async (request, reply) => {
+fastify.get('/audit/:contractId/pdf', async (request, reply) => {
 
 	const { contractId } = request.params;
 
@@ -338,7 +338,10 @@ fastify.get('/audit/:contractId/report', async (request, reply) => {
 
 	const pdfBytes = await readFileAsync(join('reports', `${contractId}.pdf`));
     
-	reply.send(pdfBytes);
+	reply.send({
+		status: 'success',
+		pdf: pdfBytes.toString('base64')
+	});
 });
 
 // generateAuditReport(_contractId).then((pdf) => {
