@@ -11,12 +11,20 @@ const writeFileAsync = promisify(fs.writeFile);
 const makeDirAsync = promisify(fs.mkdir);
 const existsAsync = promisify(fs.exists);
 
-const { PDFDocument, PDFFont, PDFName, PDFString, rgb, breakTextIntoLines } = require('pdf-lib');
+const { PDFDocument, PDFName, PDFString, rgb, breakTextIntoLines } = require('pdf-lib');
 const fontkit = require('@pdf-lib/fontkit');
 
 const DiffMatchPatch = require('diff-match-patch');
 const dmp = new DiffMatchPatch();
 const pako = require('pako');
+
+const fastify = require('fastify')({
+    logger: true
+});
+
+fastify.register(require('@fastify/cors'), {
+    origin: '*'
+});
 
 const { Configuration, OpenAIApi } = require("openai");
 const configuration = new Configuration({
@@ -110,6 +118,9 @@ const generateAuditReport = async (contractId) => {
                 fixType
             });
         }
+
+        const tokenRes = await fetch(`https://dapp.herokuapp.com/token-audit?contract=${contractId}`);
+        const tokenData = await tokenRes.json();
         
         const existingPdfBytes = fs.readFileSync('./template.pdf')
         const pdfDoc = await PDFDocument.load(existingPdfBytes)
@@ -130,7 +141,7 @@ const generateAuditReport = async (contractId) => {
 
         const annots = [];
 
-        pages[0].drawText('Floki', {
+        pages[0].drawText(tokenData.token_name, {
             size: 18,
             x: 160,
             y: 301,
@@ -139,7 +150,7 @@ const generateAuditReport = async (contractId) => {
             font: obudaBoldFont
         });
     
-        pages[0].drawText('FLOKI', {
+        pages[0].drawText(tokenData.token_symbol, {
             size: 18,
             x: 180,
             y: 262,
@@ -148,7 +159,7 @@ const generateAuditReport = async (contractId) => {
             font: obudaBoldFont
         });
     
-        pages[0].drawText('0xcf0c122c6b73ff809c693db761e7baebe62b6a2e', {
+        pages[0].drawText(contractId, {
             size: 12,
             x: 270,
             y: 223,
@@ -241,7 +252,6 @@ const generateAuditReport = async (contractId) => {
     }
 
     if (!await existsAsync(rootDir)) await makeDirAsync(rootDir);
-    console.log(join(rootDir, contractId))
     if (await existsAsync(join(rootDir, contractId))) return analyze();
 
     return new Promise(async (resolve) => {
@@ -265,9 +275,16 @@ const generateAuditReport = async (contractId) => {
 
 }
 
-generateAuditReport(_contractId).then((pdf) => {
-    fs.writeFile('audit.pdf', pdf, (err) => {
-        if (err) throw err;
-        console.log('The file has been saved!');
-    });
-})
+// generateAuditReport(_contractId).then((pdf) => {
+//     fs.writeFile('audit.pdf', pdf, (err) => {
+//         if (err) throw err;
+//         console.log('The file has been saved!');
+//     });
+// })
+
+fastify.listen({
+    port: 3000
+}, (err, address) => {
+    if (err) throw err;
+    console.log(`server listening on ${address}`);
+});
