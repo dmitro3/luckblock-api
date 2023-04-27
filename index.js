@@ -8,6 +8,7 @@ const chokidar = require('chokidar');
 
 const promisify = require('util').promisify;
 const writeFileAsync = promisify(fs.writeFile);
+const readFileAsync = promisify(fs.readFile);
 const makeDirAsync = promisify(fs.mkdir);
 const existsAsync = promisify(fs.exists);
 
@@ -17,6 +18,13 @@ const fontkit = require('@pdf-lib/fontkit');
 const DiffMatchPatch = require('diff-match-patch');
 const dmp = new DiffMatchPatch();
 const pako = require('pako');
+
+const { createClient } = require('redis');
+const client = createClient();
+
+client.on('error', err => console.log('Redis Client Error', err));
+
+client.connect();
 
 const fastify = require('fastify')({
 	logger: true
@@ -36,6 +44,8 @@ let startDate = Date.now();
 
 const rootDir = 'analyses';
 const sourcesSubdir = 'sources';
+
+let locked = false;
 
 const writeSourceCode = async (contractId) => {
 
@@ -73,6 +83,9 @@ const writeSourceCode = async (contractId) => {
 const generateAuditReport = async (contractId) => {
 
 	const analyze = async () => {
+
+		await client.set(contractId, 'our AI is fixing issues');
+
 		const analysis = require(join(__dirname, rootDir, contractId, 'analysis.json'));
 		const mainFileName = await fs.readFileSync(join(__dirname, rootDir, contractId, 'main.txt'), 'utf-8');
 		const mainFileContent = await fs.readFileSync(join(__dirname, rootDir, contractId, sourcesSubdir, mainFileName), 'utf-8');
@@ -118,10 +131,12 @@ const generateAuditReport = async (contractId) => {
 			});
 		}
 
+		await client.set(contractId, 'generating pdf report');
+
 		const tokenRes = await fetch(`https://dapp.herokuapp.com/token-audit?contract=${contractId}`);
 		const tokenData = await tokenRes.json();
         
-		const existingPdfBytes = fs.readFileSync('./template.pdf');
+		const existingPdfBytes = await readFileAsync('./template.pdf');
 		const pdfDoc = await PDFDocument.load(existingPdfBytes);
 		const pages = pdfDoc.getPages();
 
@@ -245,6 +260,8 @@ const generateAuditReport = async (contractId) => {
 			pages[pagePerFixType[fixType]].node.set(PDFName.of('Annots'), pdfDoc.context.obj(annots));
             
 			const pdfBytes = await pdfDoc.save();
+            
+			writeFileAsync(join('reports', `${contractId}.pdf`), pdfBytes);
 
 			return pdfBytes;
 		}
@@ -255,7 +272,12 @@ const generateAuditReport = async (contractId) => {
 
 	// eslint-disable-next-line no-async-promise-executor
 	return new Promise(async (resolve) => {
+
+		await client.set(contractId, 'downloading contract');
+
 		const mainFile = await writeSourceCode(contractId);
+
+		await client.set(contractId, 'finding major issues');
 
 		const watcher = chokidar.watch(join(rootDir, contractId));
 
@@ -274,6 +296,50 @@ const generateAuditReport = async (contractId) => {
 	});
 
 };
+
+fastify.post('/audit/:contractId', async (request, reply) => {
+
+	if (locked) {
+		return reply.send({ error: 'server is busy' });
+	}
+
+	locked = true;
+
+	const { contractId } = request.params;
+
+	const outputExists = await existsAsync(join('reports', `${contractId}.pdf`));
+
+	if (outputExists) {
+		return reply.send({ status: 'ended' });
+	}
+
+	generateAuditReport(contractId);
+    
+	reply.send({ status: 'started' });
+});
+
+fastify.get('/audit/:contractId/status', async (request, reply) => {
+
+	const { contractId } = request.params;
+
+	const status = await client.get(contractId);
+    
+	reply.send({ status: status || 'unknown' });
+});
+
+fastify.get('/audit/:contractId/report', async (request, reply) => {
+
+	const { contractId } = request.params;
+
+	const outputExists = await existsAsync(join('reports', `${contractId}.pdf`));
+	if (!outputExists) {
+		return reply.send({ error: 'unknown' });
+	}
+
+	const pdfBytes = await readFileAsync(join('reports', `${contractId}.pdf`));
+    
+	reply.send(pdfBytes);
+});
 
 // generateAuditReport(_contractId).then((pdf) => {
 //     fs.writeFile('audit.pdf', pdf, (err) => {
