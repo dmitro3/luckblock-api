@@ -14,10 +14,12 @@
         "diff-match-patch": "^1.0.5",
         "dotenv": "^16.0.3",
         "fastify": "^4.16.3",
-        "node-fetch": "2.6.6",
+        "node-fetch": "2.6.9",
         "openai": "^3.2.1",
         "pako": "^2.1.0",
+        "parse-semver": "^1.1.1",
         "pdf-lib": "^1.17.1",
-        "redis": "^4.6.5"
+        "redis": "^4.6.5",
+        "semver-parser": "^4.1.4"
     }
 }

@@ -13,3 +13,5 @@ analyses
 
 # Keys
 .env
+
+tests/*

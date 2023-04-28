@@ -1,5 +1,9 @@
 # smart-contract-auditor-api
 
+## Install
+
+* install `solc-select` + run `solc-select install all`
+* install `slither`
 
 ## Documentation
 
