@@ -2,9 +2,12 @@ const { join } = require('path');
 const chokidar = require('chokidar');
 const childProcess = require('child_process');
 const { readFile } = require('fs');
+const { redisClient } = require('../redis');
 const semver = import('semver-parser');
 
 module.exports = function (contractId) {
+
+	redisClient.set(contractId, 'Identifying major issues...');
 
 	return new Promise((resolve, reject) => {
 

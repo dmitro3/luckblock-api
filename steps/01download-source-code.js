@@ -1,7 +1,10 @@
+const { redisClient } = require('../redis');
 const { makeDirAsync, existsAsync, writeFileAsync } = require('../util');
 const { join } = require('path');
 
 module.exports = async function (contractId) {
+
+	redisClient.set(contractId, 'Downloading contract source code...');
 
 	if (!await existsAsync(process.env.TMP_ROOT_DIR)) await makeDirAsync(process.env.TMP_ROOT_DIR);
 

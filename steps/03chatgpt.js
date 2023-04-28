@@ -1,6 +1,7 @@
 const { join } = require('path');
 const { readFileAsync, writeFileAsync } = require('../util');
 const { Configuration, OpenAIApi } = require('openai');
+const { redisClient } = require('../redis');
 
 const configuration = new Configuration({
 	apiKey: process.env.OPENAI_API_KEY,
@@ -25,6 +26,10 @@ module.exports = async function (contractId) {
 	const suggestions = [];
 
 	for (let detector of highDetectors) {
+
+		const currentIndex = highDetectors.indexOf(detector);
+		redisClient.set(contractId, `Our IA is fixing issues... (${currentIndex+1}/${highDetectors.length})`);
+
 		const detectedFunction = detector.elements.find((element) => element.type === 'function');
 		const detectedFunctionContent = mainFileContent.slice(detectedFunction.source_mapping.start, detectedFunction.source_mapping.start + detectedFunction.source_mapping.length);
 
@@ -55,6 +60,7 @@ module.exports = async function (contractId) {
 			impact: detector.impact,
 			confidence: detector.confidence
 		});
+
 	}
 
 	await writeFileAsync(join(process.env.TMP_ROOT_DIR, contractId, 'suggestions.json'), JSON.stringify(suggestions, null, 4), 'utf-8');
