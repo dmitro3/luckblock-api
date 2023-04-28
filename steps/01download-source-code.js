@@ -11,6 +11,10 @@ module.exports = async function (contractId) {
 	const res = await fetch(`https://api.etherscan.io/api?module=contract&action=getsourcecode&address=${contractId}`);
 	const data = await res.json();
 
+	if (data.result[0].ABI === 'Contract source code not verified') {
+		throw new Error('invalid_contract');
+	}
+
 	const sources = data.result[0].SourceCode.startsWith('{{') ? JSON.parse(data.result[0].SourceCode.slice(1, -1)).sources : {
 		'main.sol': {
 			content: data.result[0].SourceCode

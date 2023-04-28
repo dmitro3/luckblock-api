@@ -19,6 +19,7 @@ const [
 module.exports.triggerAuditReport = async function (contractId) {
 
 	await redisClient.set(contractId, 'Starting your job...');
+	redisClient.expire(contractId, 60 * 10);
 
 	const handleErr = (err) => {
 		console.log('ERR!');

@@ -49,6 +49,8 @@ module.exports = function (contractId) {
 						cwd: join(process.env.TMP_ROOT_DIR, contractId, 'sources')
 					});
 
+				}).catch(err => {
+					reject(err);
 				});
 			});
 
@@ -62,6 +64,7 @@ async function getVersion (mainFileContent) {
 	let finalVersion = '0.0.0';
 
 	const matchs = mainFileContent.match(/pragma solidity (\^)?([0-9.]+);/);
+	console.log(matchs);
 	const [, caret, version] = matchs;
 	const { parseSemVer } = await semver;
 	const { major, minor, patch } = parseSemVer(version);
