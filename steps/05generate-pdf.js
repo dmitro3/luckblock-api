@@ -141,6 +141,143 @@ module.exports = async function (contractId) {
 		}
 
 		pages[pagePerFixType[fixType]].node.set(PDFName.of('Annots'), pdfDoc.context.obj(annots));
+
+		const properties1 = [
+			{
+				label: 'Self destruct',
+				value: tokenAuditData.selfdestruct ? 'Yes' : 'No',
+				isGreen: !tokenAuditData.selfdestruct
+			},
+			{
+				label: 'External call risk',
+				value: tokenAuditData.external_call ? 'Yes' : 'No',
+				isGreen: !tokenAuditData.external_call
+			},
+			{
+				label: 'Buy available',
+				value: !tokenAuditData.cannot_buy ? 'Yes' : 'No',
+				isGreen: !tokenAuditData.cannot_buy
+			},
+			{
+				label: 'Max sell ratio',
+				value: tokenAuditData.cannot_sell_all ? 'Yes' : 'No',
+				isGreen: tokenAuditData.cannot_sell_all
+			},
+			{
+				label: 'Tax modifiable',
+				value: tokenAuditData.slippage_modifiable ? 'Yes' : 'No',
+				isGreen: !tokenAuditData.slippage_modifiable
+			},
+			{
+				label: 'Transfer pausable',
+				value: tokenAuditData.transfer_pausable ? 'Yes' : 'No',
+				isGreen: !tokenAuditData.transfer_pausable
+			},
+			{
+				label: 'Blacklisted',
+				value: tokenAuditData.is_blacklisted ? 'Yes' : 'No',
+				isGreen: !tokenAuditData.is_blacklisted
+			},
+			{
+				label: 'Trading cooldown',
+				value: tokenAuditData.trading_cooldown ? 'Yes' : 'No',
+				isGreen: !tokenAuditData.trading_cooldown
+			},
+			{
+				label: 'Personal tax modifiable',
+				value: tokenAuditData.personal_slippage_modifiable ? 'Yes' : 'No',
+				isGreen: !tokenAuditData.personal_slippage_modifiable
+			}
+		];
+
+		const properties2 = [
+
+			{
+				label: 'Contract verified',
+				value: tokenAuditData.is_open_source ? 'Yes' : 'No',
+				isGreen: tokenAuditData.is_open_source
+			},
+			{
+				label: 'Honeypot',
+				value: tokenAuditData.is_honeypot ? 'Yes' : 'No',
+				isGreen: !tokenAuditData.is_honeypot
+			},
+			{
+				label: 'Buy tax',
+				value: tokenAuditData.buy_tax + '%',
+				isGreen: false
+			},
+			{
+				label: 'Sell tax',
+				value: tokenAuditData.sell_tax + '%',
+				isGreen: false
+			},
+			{
+				label: 'Proxy contract',
+				value: tokenAuditData.is_proxy ? 'Yes' : 'No',
+				isGreen: !tokenAuditData.is_proxy
+			},
+			{
+				label: 'Mintable',
+				value: tokenAuditData.is_mintable ? 'Yes' : 'No',
+				isGreen: !tokenAuditData.is_mintable
+			},
+			{
+				label: 'Retrieve ownership',
+				value: tokenAuditData.can_take_back_ownership ? 'Yes' : 'No',
+				isGreen: !tokenAuditData.can_take_back_ownership
+			},
+			{
+				label: 'Balance modifiable',
+				value: tokenAuditData.owner_change_balance ? 'Yes' : 'No',
+				isGreen: !tokenAuditData.owner_change_balance
+			},
+			{
+				label: 'Hidden owner',
+				value: tokenAuditData.hidden_owner ? 'Yes' : 'No',
+				isGreen: !tokenAuditData.hidden_owner
+			}
+		];
+
+		for (let i = 0; i < properties1.length; i++) {
+			pages[2].drawText(properties1[i].label, {
+				size: 20,
+				x: margin,
+				y: topOfPage - 50 - i*60,
+				maxWidth: 400,
+				lineHeight: 12,
+				font: obudaBoldFont,
+			});
+			pages[2].drawText(properties1[i].value, {
+				size: 12,
+				x: margin + 10,
+				y: topOfPage - 50 - i*60 - 20,
+				maxWidth: 400,
+				lineHeight: 12,
+				font: obudaBoldFont,
+				color: properties1[i].isGreen ? rgb(...[0, 128, 0].map((e) => e / 255)) : rgb(...[255, 0, 0].map((e) => e / 255))
+			});
+		}
+
+		for (let i = 0; i < properties2.length; i++) {
+			pages[3].drawText(properties2[i].label, {
+				size: 20,
+				x: margin,
+				y: topOfPage - 50 - i*60,
+				maxWidth: 400,
+				lineHeight: 12,
+				font: obudaBoldFont,
+			});
+			pages[3].drawText(properties2[i].value, {
+				size: 12,
+				x: margin + 10,
+				y: topOfPage - 50 - i*60 - 20,
+				maxWidth: 400,
+				lineHeight: 12,
+				font: obudaBoldFont,
+				color: properties2[i].isGreen ? rgb(...[0, 128, 0].map((e) => e / 255)) : rgb(...[255, 0, 0].map((e) => e / 255))
+			});
+		}
             
 		const pdfBytes = await pdfDoc.save();
             

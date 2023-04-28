@@ -14,7 +14,7 @@ module.exports = async function (contractId) {
 	const mainFileName = await readFileAsync(join(process.env.TMP_ROOT_DIR, contractId, 'main.txt'), 'utf-8');
 	const mainFileContent = await readFileAsync(join(process.env.TMP_ROOT_DIR, contractId, 'sources', mainFileName), 'utf-8');
     
-	const maxSuggestionCount = 2;
+	const maxSuggestionCount = 4;
 	const acceptedConfidences = ['High', 'Medium'];
 	const acceptedImpacts = ['High', 'Medium', 'Low'];
 	const highDetectors = analysis.results.detectors
@@ -28,7 +28,7 @@ module.exports = async function (contractId) {
 	for (let detector of highDetectors) {
 
 		const currentIndex = highDetectors.indexOf(detector);
-		nextStep(contractId, `Our IA is fixing issues... (${currentIndex+1}/${highDetectors.length})`);
+		nextStep(contractId, `Our AI is fixing issues... (${currentIndex+1}/${highDetectors.length})`);
 
 		const detectedFunction = detector.elements.find((element) => element.type === 'function');
 		const detectedFunctionContent = mainFileContent.slice(detectedFunction.source_mapping.start, detectedFunction.source_mapping.start + detectedFunction.source_mapping.length);
