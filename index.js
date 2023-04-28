@@ -60,7 +60,7 @@ fastify.get('/audit/:contractId/pdf', async (request, reply) => {
 });
 
 fastify.listen({
-	port: 3000
+	port: process.env.API_PORT
 }, (err, address) => {
 	if (err) throw err;
 	console.log(`server listening on ${address}`);
