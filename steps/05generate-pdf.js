@@ -27,7 +27,7 @@ module.exports = async function (contractId) {
 	const obudaBoldFontBytes = await readFileAsync('./fonts/obuda-bold.otf');
 	const obudaBoldFont = await pdfDoc.embedFont(obudaBoldFontBytes);
 
-	const obudaFontBytes = readFileAsync('./fonts/Montserrat-Thin.ttf');
+	const obudaFontBytes = await readFileAsync('./fonts/Montserrat-Thin.ttf');
 	const obudaFont = await pdfDoc.embedFont(obudaFontBytes);
 
 	const topOfPage = 650;
@@ -64,18 +64,17 @@ module.exports = async function (contractId) {
 		font: obudaBoldFont
 	});
 
+	const pagePerFixType = {
+		'bugs/logic issues': 4,
+		'optimization recommendations': 5
+	};
+
 	const groupedSuggestions = suggestions.reduce((acc, suggestion) => {
+		if (!pagePerFixType[suggestion.fixType]) suggestion.fixType = 'bugs/logic issues';
 		if (!acc[suggestion.fixType]) acc[suggestion.fixType] = [];
 		acc[suggestion.fixType].push(suggestion);
 		return acc;
 	}, {});
-
-	const pagePerFixType = {
-		'contract security': 2,
-		'trading security': 3,
-		'bugs/logic issues': 4,
-		'optimization recommendations': 5
-	};
 
 	for (let fixType of Object.keys(groupedSuggestions)) {
 
