@@ -80,7 +80,11 @@ fastify.post('/audit/:contractId/reset/:key', async (request, reply) => {
 		return reply.send({ status: 'invalid password key' });
 	}
 
-	rmAsync(join(process.env.REPORTS_ROOT_DIR, `${contractId}.pdf`));
+	if (contractId === 'all') {
+		rmAsync(process.env.REPORTS_ROOT_DIR, { recursive: true });
+	} else {
+		rmAsync(join(process.env.REPORTS_ROOT_DIR, `${contractId}.pdf`));
+	}
 
 	reply.send({ status: 'success' });
 

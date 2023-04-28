@@ -142,65 +142,67 @@ module.exports = async function (contractId) {
 
 		pages[pagePerFixType[fixType]].node.set(PDFName.of('Annots'), pdfDoc.context.obj(annots));
 
+		const formatBoolean = (string) => string === '0' ? 'No' : 'Yes';
+		const isTrue = (string) => string !== '0';
+
 		const properties1 = [
 			{
 				label: 'Self destruct',
-				value: tokenAuditData.selfdestruct ? 'Yes' : 'No',
-				isGreen: !tokenAuditData.selfdestruct
+				value: formatBoolean(tokenAuditData.selfdestruct),
+				isGreen: !isTrue(tokenAuditData.selfdestruct)
 			},
 			{
 				label: 'External call risk',
-				value: tokenAuditData.external_call ? 'Yes' : 'No',
-				isGreen: !tokenAuditData.external_call
+				value: formatBoolean(tokenAuditData.external_call),
+				isGreen: !isTrue(tokenAuditData.external_call)
 			},
 			{
 				label: 'Buy available',
-				value: !tokenAuditData.cannot_buy ? 'Yes' : 'No',
-				isGreen: !tokenAuditData.cannot_buy
+				value: formatBoolean(!tokenAuditData.cannot_buy),
+				isGreen: !isTrue(!tokenAuditData.cannot_buy)
 			},
 			{
 				label: 'Max sell ratio',
-				value: tokenAuditData.cannot_sell_all ? 'Yes' : 'No',
-				isGreen: tokenAuditData.cannot_sell_all
+				value: formatBoolean(tokenAuditData.cannot_sell_all),
+				isGreen: isTrue(tokenAuditData.cannot_sell_all)
 			},
 			{
 				label: 'Tax modifiable',
-				value: tokenAuditData.slippage_modifiable ? 'Yes' : 'No',
-				isGreen: !tokenAuditData.slippage_modifiable
+				value: formatBoolean(tokenAuditData.slippage_modifiable),
+				isGreen: !isTrue(tokenAuditData.slippage_modifiable)
 			},
 			{
 				label: 'Transfer pausable',
-				value: tokenAuditData.transfer_pausable ? 'Yes' : 'No',
-				isGreen: !tokenAuditData.transfer_pausable
+				value: formatBoolean(tokenAuditData.transfer_pausable),
+				isGreen: !isTrue(tokenAuditData.transfer_pausable)
 			},
 			{
 				label: 'Blacklisted',
-				value: tokenAuditData.is_blacklisted ? 'Yes' : 'No',
-				isGreen: !tokenAuditData.is_blacklisted
+				value: formatBoolean(tokenAuditData.is_blacklisted),
+				isGreen: !isTrue(tokenAuditData.is_blacklisted)
 			},
 			{
 				label: 'Trading cooldown',
-				value: tokenAuditData.trading_cooldown ? 'Yes' : 'No',
-				isGreen: !tokenAuditData.trading_cooldown
+				value: formatBoolean(tokenAuditData.trading_cooldown),
+				isGreen: !isTrue(tokenAuditData.trading_cooldown)
 			},
 			{
 				label: 'Personal tax modifiable',
-				value: tokenAuditData.personal_slippage_modifiable ? 'Yes' : 'No',
-				isGreen: !tokenAuditData.personal_slippage_modifiable
+				value: formatBoolean(tokenAuditData.personal_slippage_modifiable),
+				isGreen: !isTrue(tokenAuditData.personal_slippage_modifiable)
 			}
 		];
 
 		const properties2 = [
-
 			{
 				label: 'Contract verified',
-				value: tokenAuditData.is_open_source ? 'Yes' : 'No',
-				isGreen: tokenAuditData.is_open_source
+				value: formatBoolean(tokenAuditData.is_open_source),
+				isGreen: isTrue(tokenAuditData.is_open_source)
 			},
 			{
 				label: 'Honeypot',
-				value: tokenAuditData.is_honeypot ? 'Yes' : 'No',
-				isGreen: !tokenAuditData.is_honeypot
+				value: formatBoolean(tokenAuditData.is_honeypot),
+				isGreen: !isTrue(tokenAuditData.is_honeypot)
 			},
 			{
 				label: 'Buy tax',
@@ -214,28 +216,28 @@ module.exports = async function (contractId) {
 			},
 			{
 				label: 'Proxy contract',
-				value: tokenAuditData.is_proxy ? 'Yes' : 'No',
-				isGreen: !tokenAuditData.is_proxy
+				value: formatBoolean(tokenAuditData.is_proxy),
+				isGreen: !isTrue(tokenAuditData.is_proxy)
 			},
 			{
 				label: 'Mintable',
-				value: tokenAuditData.is_mintable ? 'Yes' : 'No',
-				isGreen: !tokenAuditData.is_mintable
+				value: formatBoolean(tokenAuditData.is_mintable),
+				isGreen: !isTrue(tokenAuditData.is_mintable)
 			},
 			{
 				label: 'Retrieve ownership',
-				value: tokenAuditData.can_take_back_ownership ? 'Yes' : 'No',
-				isGreen: !tokenAuditData.can_take_back_ownership
+				value: formatBoolean(tokenAuditData.can_take_back_ownership),
+				isGreen: !isTrue(tokenAuditData.can_take_back_ownership)
 			},
 			{
 				label: 'Balance modifiable',
-				value: tokenAuditData.owner_change_balance ? 'Yes' : 'No',
-				isGreen: !tokenAuditData.owner_change_balance
+				value: formatBoolean(tokenAuditData.owner_change_balance),
+				isGreen: !isTrue(tokenAuditData.owner_change_balance)
 			},
 			{
 				label: 'Hidden owner',
-				value: tokenAuditData.hidden_owner ? 'Yes' : 'No',
-				isGreen: !tokenAuditData.hidden_owner
+				value: formatBoolean(tokenAuditData.hidden_owner),
+				isGreen: !isTrue(tokenAuditData.hidden_owner)
 			}
 		];
 
