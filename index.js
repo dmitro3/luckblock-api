@@ -31,7 +31,7 @@ fastify.post('/audit/:contractId', async (request, reply) => {
 		}
 	}
 
-	if (count > 0) {
+	if (count > 2) {
 		return reply.send({ error: 'server is busy' });
 	}
 
