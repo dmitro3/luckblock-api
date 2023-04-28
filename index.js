@@ -22,9 +22,16 @@ fastify.post('/audit/:contractId', async (request, reply) => {
 	}
 
 	const info = await redisClient.info('keyspace');
-	const db0Keys = parseInt(info.split('\n')[1].substring('db0:keys='.length).split(',')[0]);
+	const lines = info.split('\n');
+	let count = 0;
+	for (let line of lines) {
+		if (line.startsWith(`db${process.env.REDIS_DB}`)) {
+			count = parseInt(line.split('=')[1].split(',')[0]);
+			break;
+		}
+	}
 
-	if (db0Keys > 0) {
+	if (count > 0) {
 		return reply.send({ error: 'server is busy' });
 	}
 

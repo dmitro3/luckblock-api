@@ -1,7 +1,7 @@
 const chalk = require('chalk');
 const { createClient } = require('redis');
 const client = createClient({
-	database: process.env.REDIS_DB
+	database: parseInt(process.env.REDIS_DB)
 });
 
 client.on('error', err => console.log('Redis Client Error', err));
