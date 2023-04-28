@@ -44,6 +44,12 @@ fastify.get('/audit/:contractId/status', async (request, reply) => {
 
 	const { contractId } = request.params;
 
+	const outputExists = await existsAsync(join(process.env.REPORTS_ROOT_DIR, `${contractId}.pdf`));
+
+	if (outputExists) {
+		return reply.send({ status: 'ended' });
+	}
+
 	const status = await redisClient.get(contractId);
     
 	reply.send({ status: status || 'unknown' });
