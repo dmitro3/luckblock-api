@@ -31,6 +31,7 @@ module.exports = async function (contractId) {
 		nextStep(contractId, `Our AI is fixing issues... (${currentIndex+1}/${highDetectors.length})`);
 
 		const detectedFunction = detector.elements.find((element) => element.type === 'function');
+		if (!detectedFunction) continue;
 		const detectedFunctionContent = mainFileContent.slice(detectedFunction.source_mapping.start, detectedFunction.source_mapping.start + detectedFunction.source_mapping.length);
 
 		const messages = [
