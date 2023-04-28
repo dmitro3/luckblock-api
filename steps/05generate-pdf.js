@@ -1,4 +1,4 @@
-const { writeFileAsync, readFileAsync } = require('../util');
+const { writeFileAsync, readFileAsync, existsAsync, makeDirAsync } = require('../util');
 const { join } = require('path');
 const { PDFDocument, breakTextIntoLines, rgb, PDFString, PDFName } = require('pdf-lib');
 const fontkit = require('@pdf-lib/fontkit');
@@ -11,6 +11,8 @@ const { nextStep } = require('../redis');
 module.exports = async function (contractId) {
 
 	nextStep(contractId, 'Generating PDF output...');
+
+	if (!await existsAsync(process.env.REPORTS_ROOT_DIR)) await makeDirAsync(process.env.REPORTS_ROOT_DIR);
 
 	const extraTokenAuditDataContent = await readFileAsync(join(process.env.TMP_ROOT_DIR, contractId, 'token-audit.json'), 'utf-8');
 	const suggestionsContent = await readFileAsync(join(process.env.TMP_ROOT_DIR, contractId, 'suggestions.json'), 'utf-8');
