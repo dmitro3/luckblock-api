@@ -30,7 +30,9 @@ module.exports = function (contractId) {
 				watcher.on('add', (path) => {
 					if (path === join(process.env.TMP_ROOT_DIR, contractId, 'analysis.json')) {
 						watcher.close();
-						resolve(contractId);
+						setTimeout(() => {
+							resolve(contractId);
+						}, 1000);
 					}
 				});
 
