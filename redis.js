@@ -11,10 +11,10 @@ client.connect();
 module.exports.redisClient = client;
 
 module.exports.nextStep = (contractId, step) => {
-	console.log(`[${chalk.blue(`${contractId}`)}] ${step}`);
+	console.log(`[step] [${chalk.greenBright(`${contractId}`)}] ${step}`);
 	this.redisClient.set(contractId, step);
 };
 
 module.exports.debugInfo = (contractId, info) => {
-	console.log(`[${chalk.cyanBright(`${contractId}`)}] ${info}`);
+	console.log(`[debug] [${chalk.cyanBright(`${contractId}`)}] ${info}`);
 };
