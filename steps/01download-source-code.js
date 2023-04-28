@@ -1,10 +1,10 @@
-const { redisClient } = require('../redis');
+const { nextStep } = require('../redis');
 const { makeDirAsync, existsAsync, writeFileAsync } = require('../util');
 const { join } = require('path');
 
 module.exports = async function (contractId) {
 
-	redisClient.set(contractId, 'Downloading contract source code...');
+	nextStep(contractId, 'Downloading contract source code...');
 
 	if (!await existsAsync(process.env.TMP_ROOT_DIR)) await makeDirAsync(process.env.TMP_ROOT_DIR);
 
@@ -30,7 +30,7 @@ module.exports = async function (contractId) {
 	}
 
 	const mainFile = Object.keys(sources)[0] || 'main.sol';
-	await writeFileAsync(join('sources', contractId, 'main.txt'), mainFile, 'utf-8');
+	await writeFileAsync(join(process.env.TMP_ROOT_DIR, contractId, 'main.txt'), mainFile, 'utf-8');
 
 	return contractId;
 

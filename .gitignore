@@ -15,3 +15,7 @@ analyses
 .env
 
 tests/*
+
+!template.pdf
+
+tmp/*

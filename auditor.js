@@ -21,6 +21,7 @@ module.exports.triggerAuditReport = async function (contractId) {
 	await redisClient.set(contractId, 'Starting your job...');
 
 	const handleErr = (err) => {
+		console.log('ERR!');
 		console.error(err);
 		redisClient.del(contractId);
 	};

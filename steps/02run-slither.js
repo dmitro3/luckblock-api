@@ -2,16 +2,18 @@ const { join } = require('path');
 const chokidar = require('chokidar');
 const childProcess = require('child_process');
 const { readFile } = require('fs');
-const { redisClient } = require('../redis');
+const { nextStep, debugInfo } = require('../redis');
 const semver = import('semver-parser');
 
 module.exports = function (contractId) {
 
-	redisClient.set(contractId, 'Identifying major issues...');
+	nextStep(contractId, 'Identifying major issues...');
 
 	return new Promise((resolve, reject) => {
 
 		readFile(join(process.env.TMP_ROOT_DIR, contractId, 'main.txt'), 'utf-8', (err1, mainFileName) => {
+
+			debugInfo(contractId, `Main file detected: ${mainFileName}`);
 
 			if (err1) {
 				reject(err1);
@@ -19,7 +21,9 @@ module.exports = function (contractId) {
 
 			readFile(join(process.env.TMP_ROOT_DIR, contractId, 'sources', mainFileName), 'utf-8', (err2, mainFileContent) => {
 
-				reject(err2);
+				if (err2) {
+					reject(err2);
+				}
 
 				const watcher = chokidar.watch(join(process.env.TMP_ROOT_DIR, contractId));
 
@@ -31,6 +35,8 @@ module.exports = function (contractId) {
 				});
 
 				getVersion(mainFileContent).then(version => {
+
+					debugInfo(contractId, `Solidity version detected: ${version}`);
 
 					childProcess.spawn('slither', [mainFileName, '--json', `${join('..', 'analysis')}.json`], {
 						env: {
@@ -57,7 +63,6 @@ async function getVersion (mainFileContent) {
 	const [, caret, version] = matchs;
 	const { parseSemVer } = await semver;
 	const { major, minor, patch } = parseSemVer(version);
-	console.log(`major: ${major}, minor: ${minor}, patch: ${patch} ${caret}}`);
 	if (caret) {
 		const versions = getVersions();
 		let newPatch = patch;

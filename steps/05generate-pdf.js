@@ -6,11 +6,11 @@ const fontkit = require('@pdf-lib/fontkit');
 const DiffMatchPatch = require('diff-match-patch');
 const dmp = new DiffMatchPatch();
 const pako = require('pako');
-const { redisClient } = require('../redis');
+const { nextStep } = require('../redis');
 
 module.exports = async function (contractId) {
 
-	redisClient.set(contractId, 'Generating PDF output...');
+	nextStep(contractId, 'Generating PDF output...');
 
 	const extraTokenAuditDataContent = await readFileAsync(join(process.env.TMP_ROOT_DIR, contractId, 'token-audit.json'), 'utf-8');
 	const suggestionsContent = await readFileAsync(join(process.env.TMP_ROOT_DIR, contractId, 'suggestions.json'), 'utf-8');

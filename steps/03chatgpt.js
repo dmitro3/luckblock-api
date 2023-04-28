@@ -1,7 +1,7 @@
 const { join } = require('path');
 const { readFileAsync, writeFileAsync } = require('../util');
 const { Configuration, OpenAIApi } = require('openai');
-const { redisClient } = require('../redis');
+const { nextStep, debugInfo } = require('../redis');
 
 const configuration = new Configuration({
 	apiKey: process.env.OPENAI_API_KEY,
@@ -10,7 +10,7 @@ const openai = new OpenAIApi(configuration);
 
 module.exports = async function (contractId) {
 
-	const analysis = await readFileAsync(join(process.env.TMP_ROOT_DIR, contractId, 'analysis.json'));
+	const analysis = JSON.parse(await readFileAsync(join(process.env.TMP_ROOT_DIR, contractId, 'analysis.json')));
 	const mainFileName = await readFileAsync(join(process.env.TMP_ROOT_DIR, contractId, 'main.txt'), 'utf-8');
 	const mainFileContent = await readFileAsync(join(process.env.TMP_ROOT_DIR, contractId, 'sources', mainFileName), 'utf-8');
     
@@ -28,23 +28,29 @@ module.exports = async function (contractId) {
 	for (let detector of highDetectors) {
 
 		const currentIndex = highDetectors.indexOf(detector);
-		redisClient.set(contractId, `Our IA is fixing issues... (${currentIndex+1}/${highDetectors.length})`);
+		nextStep(contractId, `Our IA is fixing issues... (${currentIndex+1}/${highDetectors.length})`);
 
 		const detectedFunction = detector.elements.find((element) => element.type === 'function');
 		const detectedFunctionContent = mainFileContent.slice(detectedFunction.source_mapping.start, detectedFunction.source_mapping.start + detectedFunction.source_mapping.length);
 
+		const messages = [
+			{
+				role: 'system',
+				content: systemChatGptPrompt
+			},
+			{
+				role: 'user',
+				content: `Function to analyze:\n\`\`\`solidity\n${detectedFunctionContent}\n\`\`\`\n\nError:\n\`\`\`${detector.description}\n\`\`\``
+			}
+		];
+
+		const length = messages.map((message) => message.content).join('\n').length;
+
+		debugInfo(contractId, `ChatGPT prompt length: ${length} characters`);
+
 		const completion = await openai.createChatCompletion({
 			model: 'gpt-4',
-			messages: [
-				{
-					role: 'system',
-					content: systemChatGptPrompt
-				},
-				{
-					role: 'user',
-					content: `Function to analyze:\n\`\`\`solidity\n${detectedFunctionContent}\n\`\`\`\n\nError:\n\`\`\`${detector.description}\n\`\`\``
-				}
-			]
+			messages
 		});
 
 		const response = completion.data.choices[0].message;

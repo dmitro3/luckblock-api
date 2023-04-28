@@ -5,9 +5,7 @@ const { redisClient } = require('./redis');
 const { existsAsync, readFileAsync } = require('./util');
 const { join } = require('path');
 
-const fastify = require('fastify')({
-	logger: true
-});
+const fastify = require('fastify')();
 
 fastify.register(require('@fastify/cors'), {
 	origin: '*'
@@ -17,7 +15,7 @@ fastify.post('/audit/:contractId', async (request, reply) => {
 
 	const { contractId } = request.params;
 
-	const outputExists = await existsAsync(join('reports', `${contractId}.pdf`));
+	const outputExists = await existsAsync(join(process.env.REPORTS_ROOT_DIR, `${contractId}.pdf`));
 
 	if (outputExists) {
 		return reply.send({ status: 'ended' });
@@ -48,12 +46,12 @@ fastify.get('/audit/:contractId/pdf', async (request, reply) => {
 
 	const { contractId } = request.params;
 
-	const outputExists = await existsAsync(join('reports', `${contractId}.pdf`));
+	const outputExists = await existsAsync(join(process.env.REPORTS_ROOT_DIR, `${contractId}.pdf`));
 	if (!outputExists) {
 		return reply.send({ error: 'unknown' });
 	}
 
-	const pdfBytes = await readFileAsync(join('reports', `${contractId}.pdf`));
+	const pdfBytes = await readFileAsync(join(process.env.REPORTS_ROOT_DIR, `${contractId}.pdf`));
     
 	reply.send({
 		status: 'success',
