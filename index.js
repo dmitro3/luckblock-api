@@ -2,7 +2,7 @@ require('dotenv').config();
 
 const { triggerAuditReport } = require('./auditor');
 const { redisClient } = require('./redis');
-const { existsAsync, readFileAsync } = require('./util');
+const { existsAsync, readFileAsync, rmAsync } = require('./util');
 const { join } = require('path');
 
 const fastify = require('fastify')();
@@ -64,6 +64,20 @@ fastify.get('/audit/:contractId/pdf', async (request, reply) => {
 		status: 'success',
 		pdf: pdfBytes.toString('base64')
 	});
+});
+
+fastify.post('/audit/:contractId/reset/:key', async (request, reply) => {
+
+	const { contractId, key } = request.params;
+
+	if (key !== process.env.RESET_KEY) {
+		return reply.send({ status: 'invalid password key' });
+	}
+
+	rmAsync(join(process.env.REPORTS_ROOT_DIR, `${contractId}.pdf`));
+
+	reply.send({ status: 'success' });
+
 });
 
 fastify.listen({
