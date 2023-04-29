@@ -8,11 +8,11 @@ const configuration = new Configuration({
 });
 const openai = new OpenAIApi(configuration);
 
-const getSuggestion = async (contractId, mainFileContent, systemChatGptPrompt, detector) => {
+const getSuggestion = async (contractId, mainFileContent, systemChatGptPrompt, detector, i) => {
 
 	const detectedFunction = detector.elements.find((element) => element.type === 'function');
 	if (!detectedFunction) return null;
-	const detectedFunctionContent = mainFileContent.slice(detectedFunction.source_mapping.start, detectedFunction.source_mapping.start + detectedFunction.source_mapping.length);
+	const detectedFunctionContent = Buffer.from(mainFileContent).subarray(detectedFunction.source_mapping.start, detectedFunction.source_mapping.start + detectedFunction.source_mapping.length).toString();
 
 	const messages = [
 		{
@@ -35,6 +35,8 @@ const getSuggestion = async (contractId, mainFileContent, systemChatGptPrompt, d
 	});
 
 	const response = completion.data.choices[0].message;
+
+	writeFileAsync(join(process.env.TMP_ROOT_DIR, contractId, `chatgpt-answer-${i}.txt`), messages.map((message) => message.content).join('\n') + '\n' + response.content, 'utf-8');
 
 	const fixedCode = response.content.match(/Alternative code:\n```solidity([\s\S.]*?)```/)[1].trim();
 	const explanation = response.content.match(/Explained fix:\n```([\s\S.]*?)```/)[1].trim();
@@ -65,8 +67,8 @@ module.exports = async function (contractId) {
 
 	const systemChatGptPrompt = await readFileAsync(join('chatgpt-prompt.txt'), 'utf-8');
 
-	const suggestions = (await Promise.all(highDetectors.map(async (detector) => {
-		return await getSuggestion(contractId, mainFileContent, systemChatGptPrompt, detector);
+	const suggestions = (await Promise.all(highDetectors.map(async (detector, i) => {
+		return await getSuggestion(contractId, mainFileContent, systemChatGptPrompt, detector, i);
 	}))).filter(Boolean);
 
 	await writeFileAsync(join(process.env.TMP_ROOT_DIR, contractId, 'suggestions.json'), JSON.stringify(suggestions, null, 4), 'utf-8');
