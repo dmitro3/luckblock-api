@@ -1,4 +1,4 @@
-const { redisClient } = require('./redis');
+const { redisClient, debugInfo } = require('./redis');
 
 const [
 	cleanUp,
@@ -18,6 +18,8 @@ const [
 
 module.exports.triggerAuditReport = async function (contractId) {
 
+	const startAt = Date.now();
+
 	await redisClient.set(contractId, 'Starting your job...');
 	redisClient.expire(contractId, 60 * 10);
 
@@ -33,7 +35,10 @@ module.exports.triggerAuditReport = async function (contractId) {
 		.then(chatGPT)
 		.then(extraAudit)
 		.then(generatePDF)
-		.then(() => redisClient.del(contractId))
+		.then(() => {
+			redisClient.del(contractId);
+			debugInfo(contractId, `Done in ${(Date.now() - startAt) / 1000} seconds`);
+		})
 		.catch(handleErr);
 
 };
