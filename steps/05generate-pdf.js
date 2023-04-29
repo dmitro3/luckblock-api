@@ -114,7 +114,7 @@ module.exports = async function (contractId) {
 			A: {
 				Type: 'Action',
 				S: 'URI',
-				URI: PDFString.of(`https://smart-contract-auditor-diffviewer.vercel.app/v1/diff#${randomId}`),
+				URI: PDFString.of(`https://miyamoto-sma-api.androz2091.fr/diff/${randomId}`),
 			}
 		});
 		annots.push(pdfDoc.context.register(pdfUrlDict));
