@@ -58,12 +58,10 @@ module.exports = async function (contractId) {
 
 		const fixedCode = response.content.match(/Alternative code:\n```solidity([\s\S.]*?)```/)[1].trim();
 		const explanation = response.content.match(/Explained fix:\n```([\s\S.]*?)```/)[1].trim();
-		const fixType = response.content.match(/Fix type:\n```([\s\S.]*?)```/)[1].trim();
 
 		suggestions.push({
 			content: explanation,
 			codes: [detectedFunctionContent, fixedCode],
-			fixType,
 			impact: detector.impact,
 			confidence: detector.confidence
 		});
