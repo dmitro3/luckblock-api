@@ -80,7 +80,7 @@ module.exports = async function (contractId) {
 		});
 		lastSuggestionEndedAt = lastSuggestionEndedAt - 40;
 
-		pages[4].drawText(suggestions.content, {
+		pages[4].drawText(suggestions[i].content, {
 			size: 10,
 			x: margin,
 			y: lastSuggestionEndedAt - 30,
