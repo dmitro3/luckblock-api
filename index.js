@@ -73,11 +73,11 @@ fastify.get('/audit/:contractId/pdf', async (request, reply) => {
 	});
 });
 
-fastify.get('/audit/:contractId/diff/:id', async (request, reply) => {
+fastify.get('/diff/:id', async (request, reply) => {
 
-	const { contractId, id } = request.params;
+	const { id } = request.params;
 
-	const codeDiff = await getCodeDiff(contractId, id);
+	const codeDiff = await getCodeDiff(id);
 
 	if (!codeDiff) {
 		return reply.send({ status: 'unknown' });
