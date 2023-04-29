@@ -5,8 +5,8 @@ const fontkit = require('@pdf-lib/fontkit');
 
 const DiffMatchPatch = require('diff-match-patch');
 const dmp = new DiffMatchPatch();
-const pako = require('pako');
 const { nextStep } = require('../redis');
+const { addCodeDiff } = require('../postgres');
 
 module.exports = async function (contractId) {
 
@@ -118,10 +118,9 @@ module.exports = async function (contractId) {
 			});
 
 			const diff = dmp.diff_main(groupedSuggestions[fixType][i].codes[0], groupedSuggestions[fixType][i].codes[1]);
-			const gzip = Buffer.from(
-				pako.gzip(
-					JSON.stringify({ diff, lhsLabel: 'previous_code.sol', rhsLabel: 'ai_fixed_code.sol' }))
-			).toString('base64');
+
+			const randomId = Math.random().toString(36).substring(2, 15);
+			addCodeDiff(contractId, JSON.stringify({ diff, lhsLabel: 'previous_code.sol', rhsLabel: 'ai_fixed_code.sol' }), randomId);
 
 			const pdfUrlDict = pdfDoc.context.obj({
 				Type: 'Annot',
@@ -130,7 +129,7 @@ module.exports = async function (contractId) {
 				A: {
 					Type: 'Action',
 					S: 'URI',
-					URI: PDFString.of(`https://diffviewer.vercel.app/v1/diff#${gzip}`),
+					URI: PDFString.of(`https://smart-contract-auditor-diffviewer.vercel.app/v1/diff#${randomId}`),
 				}
 			});
 			annots.push(pdfDoc.context.register(pdfUrlDict));

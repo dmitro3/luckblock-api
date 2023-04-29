@@ -1,6 +1,7 @@
 require('dotenv').config();
 
 const { triggerAuditReport } = require('./auditor');
+const { getCodeDiff } = require('./postgres');
 const { redisClient } = require('./redis');
 const { existsAsync, readFileAsync, rmAsync } = require('./util');
 const { join } = require('path');
@@ -69,6 +70,22 @@ fastify.get('/audit/:contractId/pdf', async (request, reply) => {
 	reply.send({
 		status: 'success',
 		pdf: pdfBytes.toString('base64')
+	});
+});
+
+fastify.get('/audit/:contractId/diff/:id', async (request, reply) => {
+
+	const { contractId, id } = request.params;
+
+	const codeDiff = await getCodeDiff(contractId, id);
+
+	if (!codeDiff) {
+		return reply.send({ status: 'unknown' });
+	}
+    
+	reply.send({
+		status: 'success',
+		diff: JSON.parse(codeDiff.code_diff)
 	});
 });
 
