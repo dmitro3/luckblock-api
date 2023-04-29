@@ -21,7 +21,7 @@ const getSuggestion = async (contractId, mainFileContent, systemChatGptPrompt, d
 		},
 		{
 			role: 'user',
-			content: `Function to analyze:\n\`\`\`solidity\n${detectedFunctionContent}\n\`\`\`\n\nError:\n\`\`\`${detector.description}\n\`\`\``
+			content: `Function to analyze:\n\`\`\`solidity\n${detectedFunctionContent}\n\`\`\`\n\nError:\n\`\`\`\n${detector.description}\n\`\`\``
 		}
 	];
 
