@@ -3,6 +3,7 @@ const chokidar = require('chokidar');
 const childProcess = require('child_process');
 const { readFile } = require('fs');
 const { nextStep, debugInfo } = require('../redis');
+const { writeFileAsync } = require('../util');
 const semver = import('semver-parser');
 
 module.exports = function (contractId) {
