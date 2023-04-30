@@ -11,9 +11,9 @@ const openai = new OpenAIApi(configuration);
 const getSuggestion = async (contractId, mainFileContent, version, systemChatGptPrompt, detector, i) => {
 
 	if (version.minor >= 8) {
-		systemChatGptPrompt.replace('{{extrainfo}}', '- solidity version of the contract is 0.8 or higher, so never use the safemath lib in your code, use mathematical expressions.');
+		systemChatGptPrompt = systemChatGptPrompt.replace('{{extrainfo}}', '- solidity version of the contract is 0.8 or higher, so never use the safemath lib in your code, use mathematical expressions.');
 	} else {
-		systemChatGptPrompt.replace('{{extrainfo}}', '');
+		systemChatGptPrompt = systemChatGptPrompt.replace('{{extrainfo}}', '');
 	}
 
 	const detectedFunction = detector.elements.find((element) => element.type === 'function');
