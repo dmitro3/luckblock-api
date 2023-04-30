@@ -1,4 +1,4 @@
-const { redisClient, debugInfo } = require('./redis');
+const { pending, startsAt, debugInfo } = require('./cache');
 
 const [
 	cleanUp,
@@ -20,8 +20,8 @@ module.exports.triggerAuditReport = async function (contractId) {
 
 	const startAt = Date.now();
 
-	await redisClient.set(contractId, 'Starting your job...');
-	redisClient.expire(contractId, 60 * 10);
+	pending[contractId] = 'Starting your job...';
+	startsAt[contractId] = startAt;
 
 	const handleErr = (err) => {
 		console.log('ERR!');
@@ -36,7 +36,8 @@ module.exports.triggerAuditReport = async function (contractId) {
 		.then(extraAudit)
 		.then(generatePDF)
 		.then(() => {
-			redisClient.del(contractId);
+			delete pending[contractId];
+			delete startsAt[contractId];
 			debugInfo(contractId, `Done in ${(Date.now() - startAt) / 1000} seconds`);
 		})
 		.catch(handleErr);

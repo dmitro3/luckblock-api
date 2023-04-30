@@ -1,7 +1,7 @@
 const { join } = require('path');
 const { readFileAsync, writeFileAsync } = require('../util');
 const { Configuration, OpenAIApi } = require('openai');
-const { debugInfo, nextStep } = require('../redis');
+const { debugInfo, nextStep } = require('../cache');
 
 const configuration = new Configuration({
 	apiKey: process.env.OPENAI_API_KEY,

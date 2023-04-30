@@ -24,7 +24,6 @@
         "parse-semver": "^1.1.1",
         "pdf-lib": "^1.17.1",
         "pg": "^8.10.0",
-        "redis": "^4.6.5",
         "semver-parser": "^4.1.4"
     }
 }

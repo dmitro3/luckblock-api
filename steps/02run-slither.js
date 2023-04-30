@@ -2,7 +2,7 @@ const { join } = require('path');
 const chokidar = require('chokidar');
 const childProcess = require('child_process');
 const { readFile } = require('fs');
-const { nextStep, debugInfo } = require('../redis');
+const { nextStep, debugInfo } = require('../cache');
 const { writeFileAsync } = require('../util');
 const semver = import('semver-parser');
 

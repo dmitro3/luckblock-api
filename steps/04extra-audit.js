@@ -1,7 +1,7 @@
 const fetch = require('node-fetch');
 const { writeFileAsync } = require('../util');
 const { join } = require('path');
-const { nextStep } = require('../redis');
+const { nextStep } = require('../cache');
 
 module.exports = async function (contractId) {
 

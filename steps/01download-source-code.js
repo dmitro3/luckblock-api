@@ -1,4 +1,4 @@
-const { nextStep } = require('../redis');
+const { nextStep } = require('../cache');
 const { makeDirAsync, existsAsync, writeFileAsync } = require('../util');
 const { join } = require('path');
 

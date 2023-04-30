@@ -5,7 +5,7 @@ const fontkit = require('@pdf-lib/fontkit');
 
 const DiffMatchPatch = require('diff-match-patch');
 const dmp = new DiffMatchPatch();
-const { nextStep } = require('../redis');
+const { nextStep } = require('../cache');
 const { addCodeDiff } = require('../postgres');
 
 module.exports = async function (contractId) {
