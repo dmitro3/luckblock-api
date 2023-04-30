@@ -2,7 +2,7 @@ require('dotenv').config();
 
 const { triggerAuditReport } = require('./auditor');
 const { getCodeDiff } = require('./postgres');
-const { redisClient } = require('./cache');
+const { pending } = require('./cache');
 const { existsAsync, readFileAsync, rmAsync } = require('./util');
 const { join } = require('path');
 
@@ -22,15 +22,7 @@ fastify.post('/audit/:contractId', async (request, reply) => {
 		return reply.send({ status: 'ended' });
 	}
 
-	const info = await redisClient.info('keyspace');
-	const lines = info.split('\n');
-	let count = 0;
-	for (let line of lines) {
-		if (line.startsWith(`db${process.env.REDIS_DB}`)) {
-			count = parseInt(line.split('=')[1].split(',')[0]);
-			break;
-		}
-	}
+	let count = Object.keys(pending).length;
 
 	if (count > 2) {
 		return reply.send({ error: 'server is busy' });
@@ -51,7 +43,7 @@ fastify.get('/audit/:contractId/status', async (request, reply) => {
 		return reply.send({ status: 'ended' });
 	}
 
-	const status = await redisClient.get(contractId);
+	const status = pending[contractId];
     
 	reply.send({ status: status || 'unknown' });
 });
