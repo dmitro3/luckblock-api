@@ -40,6 +40,9 @@ module.exports = function (contractId) {
 
 					debugInfo(contractId, `Solidity version detected: ${version}`);
 
+					const { major, minor, patch } = parseSemVer(version);
+					writeFileAsync(join(process.env.TMP_ROOT_DIR, contractId, 'version.json'), JSON.stringify({ major, minor, patch }), 'utf-8');
+
 					childProcess.spawn('slither', [mainFileName, '--json', `${join('..', 'analysis')}.json`], {
 						env: {
 							SOLC_VERSION: version,

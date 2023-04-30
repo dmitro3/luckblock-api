@@ -8,7 +8,13 @@ const configuration = new Configuration({
 });
 const openai = new OpenAIApi(configuration);
 
-const getSuggestion = async (contractId, mainFileContent, systemChatGptPrompt, detector, i) => {
+const getSuggestion = async (contractId, mainFileContent, version, systemChatGptPrompt, detector, i) => {
+
+	if (version.minor >= 8) {
+		systemChatGptPrompt.replace('{{extrainfo}}', '- solidity version of the contract is 0.8 or higher, so never use the safemath lib in your code, use mathematical expressions.');
+	} else {
+		systemChatGptPrompt.replace('{{extrainfo}}', '');
+	}
 
 	const detectedFunction = detector.elements.find((element) => element.type === 'function');
 	if (!detectedFunction) return null;
@@ -57,7 +63,8 @@ module.exports = async function (contractId) {
 	const analysis = JSON.parse(await readFileAsync(join(process.env.TMP_ROOT_DIR, contractId, 'analysis.json'), 'utf-8'));
 	const mainFileName = await readFileAsync(join(process.env.TMP_ROOT_DIR, contractId, 'main.txt'), 'utf-8');
 	const mainFileContent = await readFileAsync(join(process.env.TMP_ROOT_DIR, contractId, 'sources', mainFileName), 'utf-8');
-    
+	const version = JSON.parse(await readFileAsync(join(process.env.TMP_ROOT_DIR, contractId, 'version.json'), 'utf-8'));
+
 	const maxSuggestionCount = 4;
 	const acceptedConfidences = ['High', 'Medium'];
 	const acceptedImpacts = ['High', 'Medium', 'Low'];
@@ -68,7 +75,7 @@ module.exports = async function (contractId) {
 	const systemChatGptPrompt = await readFileAsync(join('chatgpt-prompt.txt'), 'utf-8');
 
 	const suggestions = (await Promise.all(highDetectors.map(async (detector, i) => {
-		return await getSuggestion(contractId, mainFileContent, systemChatGptPrompt, detector, i);
+		return await getSuggestion(contractId, mainFileContent, version, systemChatGptPrompt, detector, i);
 	}))).filter(Boolean);
 
 	await writeFileAsync(join(process.env.TMP_ROOT_DIR, contractId, 'suggestions.json'), JSON.stringify(suggestions, null, 4), 'utf-8');
