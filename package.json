@@ -5,6 +5,9 @@
     "repository": "https://github.com/Androz2091/smart-contract-auditor-api.git",
     "author": "Androz2091 <androz2091@gmail.com>",
     "license": "MIT",
+    "scripts": {
+        "start": "node index.js"
+    },
     "dependencies": {
         "@fastify/cors": "^8.2.1",
         "@pdf-lib/fontkit": "^1.1.1",
