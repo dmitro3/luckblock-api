@@ -38,14 +38,13 @@ module.exports = function (contractId) {
 
 				getVersion(mainFileContent).then(version => {
 
-					debugInfo(contractId, `Solidity version detected: ${version}`);
+					debugInfo(contractId, `Solidity version detected: ${version.version}`);
 
-					const { major, minor, patch } = parseSemVer(version);
 					writeFileAsync(join(process.env.TMP_ROOT_DIR, contractId, 'version.json'), JSON.stringify({ major, minor, patch }), 'utf-8');
 
 					childProcess.spawn('slither', [mainFileName, '--json', `${join('..', 'analysis')}.json`], {
 						env: {
-							SOLC_VERSION: version,
+							SOLC_VERSION: version.version,
 							PATH: '/bin:/usr/bin:/usr/local/bin',
 							...process.env
 						},
@@ -81,7 +80,7 @@ async function getVersion (mainFileContent) {
 		finalVersion = `${major}.${minor}.${patch}`;
 	}
 
-	return finalVersion;
+	return parseSemVer(finalVersion);
 }
 
 function getVersions () {
