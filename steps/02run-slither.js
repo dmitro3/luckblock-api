@@ -85,6 +85,7 @@ module.exports = function (contractId) {
 
 							await analysisCreatePromise.then(() => {
 								setTimeout(() => {
+									watcher.close();
 									resolve(contractId);
 								}, 1000);
 							});
