@@ -54,8 +54,13 @@ const getSuggestion = async (contractId, mainFileContent, version, systemChatGpt
 
 	writeFileAsync(join(process.env.TMP_ROOT_DIR, contractId, `chatgpt-answer-${i}.txt`), messages.map((message) => message.content).join('\n') + '\n' + response.content, 'utf-8');
 
-	const fixedCode = response.content.match(/Alternative code:\n```solidity([\s\S.]*?)```/)[1].trim();
-	const explanation = response.content.match(/Explained fix:\n```([\s\S.]*?)```/)[1].trim();
+	const fixedCode = response.content.match(/Alternative code:\n```solidity([\s\S.]*?)```/)?.[1]?.trim();
+	const explanation = response.content.match(/Explained fix:\n```([\s\S.]*?)```/)?.[1]?.trim();
+
+	if (!fixedCode || !explanation) {
+		debugInfo(contractId, `ChatGPT did not return a valid response for ID ${i}`);
+		return null;
+	}
 
 	return {
 		content: explanation,
