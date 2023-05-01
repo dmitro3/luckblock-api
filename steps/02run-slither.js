@@ -49,6 +49,7 @@ module.exports = function (contractId) {
 					});
 	
 					watcher.on('add', async (path) => {
+						debugInfo(contractId, `File detected: ${path}`);
 						if (path === join(process.env.TMP_ROOT_DIR, contractId, 'analysis.json')) {
 							analysisCreated = true;
 							debugInfo(contractId, `Analysis file detected: ${path}`);
