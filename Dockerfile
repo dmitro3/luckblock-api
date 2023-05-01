@@ -5,7 +5,7 @@ RUN apt-get -y install python3 python3-dev
 RUN apt-get -y install python3-pip
 
 RUN pip3 install solc-select
-RUN pip3 install slither
+RUN pip3 install slither-analyzer
 
 RUN solc-select install all
 
