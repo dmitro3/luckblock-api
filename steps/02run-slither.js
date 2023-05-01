@@ -43,47 +43,50 @@ module.exports = function (contractId) {
 
 					const watcher = chokidar.watch(join(process.env.TMP_ROOT_DIR, contractId));
 
-					let analysisCreated = false;
-					let dotFileCreated = false;
+					let analysisCreatePromiseResolve = null;
+					let analysisCreatePromise = new Promise((resolve) => {
+						analysisCreatePromiseResolve = resolve;
+					});
 	
 					watcher.on('add', async (path) => {
 						if (path === join(process.env.TMP_ROOT_DIR, contractId, 'analysis.json')) {
 							analysisCreated = true;
 							debugInfo(contractId, `Analysis file detected: ${path}`);
+
+							analysisCreatePromiseResolve();
 						} else if (
 							path.endsWith('all_contracts.call-graph.dot')
 						) {
 							debugInfo(contractId, `Call graph file detected: ${path}`);
-							dotFileCreated = true;
 							setTimeout(() => {
 								debugInfo(contractId, `Converting call graph (${parse(path).base}) file to JSON...`);
 								childProcess.spawn('dot', ['-Tdot_json', parse(path).base, '-o', `${join('..', 'call-graph')}.json`], options);
 							}, 1000);
 						} else if (path === join(process.env.TMP_ROOT_DIR, contractId, 'call-graph.json')) {
-							if (analysisCreated && dotFileCreated) {
-								debugInfo(contractId, `Call graph file detected: ${path}`);
+							debugInfo(contractId, `Call graph file detected: ${path}`);
 
-								const tokenName = /contract ([A-Za-z0-0_]+) is ERC20/g.exec(mainFileContent)[1];
+							const tokenName = /contract ([A-Za-z0-0_]+) is ERC20/g.exec(mainFileContent)[1];
 
-								debugInfo(contractId, `Token name detected: ${tokenName}`);
+							debugInfo(contractId, `Token name detected: ${tokenName}`);
 
-								const data = JSON.parse(await readFileAsync(path));
-								const tokenData = data.objects.find((d) => d.name.startsWith('cluster') && d.name.endsWith(tokenName));
+							const data = JSON.parse(await readFileAsync(path));
+							const tokenData = data.objects.find((d) => d.name.startsWith('cluster') && d.name.endsWith(tokenName));
 
-								if (tokenData) {
-									const functionIds = tokenData.nodes;
-									const functionNames = data.objects
-										.filter((obj) => functionIds.includes(obj._gvid))
-										.filter((obj) => obj.label)
-										.filter((obj) => obj.label !== '\\N')
-										.map((obj) => obj.label);
-									await writeFileAsync(join(process.env.TMP_ROOT_DIR, contractId, 'function-names.json'), JSON.stringify(functionNames, null, 2));
-								}
+							if (tokenData) {
+								const functionIds = tokenData.nodes;
+								const functionNames = data.objects
+									.filter((obj) => functionIds.includes(obj._gvid))
+									.filter((obj) => obj.label)
+									.filter((obj) => obj.label !== '\\N')
+									.map((obj) => obj.label);
+								await writeFileAsync(join(process.env.TMP_ROOT_DIR, contractId, 'function-names.json'), JSON.stringify(functionNames, null, 2));
+							}
 
+							await analysisCreatePromise.then(() => {
 								setTimeout(() => {
 									resolve(contractId);
 								}, 1000);
-							}
+							});
 						}
 					});
 
