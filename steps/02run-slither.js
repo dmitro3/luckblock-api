@@ -1,9 +1,9 @@
-const { join } = require('path');
+const { join, parse } = require('path');
 const chokidar = require('chokidar');
 const childProcess = require('child_process');
 const { readFile } = require('fs');
 const { nextStep, debugInfo } = require('../cache');
-const { writeFileAsync } = require('../util');
+const { writeFileAsync, readFileAsync } = require('../util');
 const semver = import('semver-parser');
 
 module.exports = function (contractId) {
@@ -26,31 +26,68 @@ module.exports = function (contractId) {
 					reject(err2);
 				}
 
-				const watcher = chokidar.watch(join(process.env.TMP_ROOT_DIR, contractId));
-
-				watcher.on('add', (path) => {
-					if (path === join(process.env.TMP_ROOT_DIR, contractId, 'analysis.json')) {
-						watcher.close();
-						setTimeout(() => {
-							resolve(contractId);
-						}, 1000);
-					}
-				});
-
 				getVersion(mainFileContent).then(version => {
 
 					debugInfo(contractId, `Solidity version detected: ${version.version}`);
 
 					writeFileAsync(join(process.env.TMP_ROOT_DIR, contractId, 'version.json'), JSON.stringify(version), 'utf-8');
 
-					childProcess.spawn('slither', [mainFileName, '--json', `${join('..', 'analysis')}.json`], {
+					const options = {
 						env: {
 							SOLC_VERSION: version.version,
 							PATH: '/bin:/usr/bin:/usr/local/bin',
 							...process.env
 						},
 						cwd: join(process.env.TMP_ROOT_DIR, contractId, 'sources')
+					};
+
+					const watcher = chokidar.watch(join(process.env.TMP_ROOT_DIR, contractId));
+
+					let analysisCreated = false;
+					let dotFileCreated = false;
+	
+					watcher.on('add', async (path) => {
+						if (path === join(process.env.TMP_ROOT_DIR, contractId, 'analysis.json')) {
+							analysisCreated = true;
+							debugInfo(contractId, `Analysis file detected: ${path}`);
+						} else if (
+							path.endsWith('all_contracts.call-graph.dot')
+						) {
+							debugInfo(contractId, `Call graph file detected: ${path}`);
+							dotFileCreated = true;
+							setTimeout(() => {
+								childProcess.spawn('dot', ['-Tdot_json', parse(path).base, '-o', `${join('..', 'call-graph')}.json`], options);
+							}, 1000);
+						} else if (path === join(process.env.TMP_ROOT_DIR, contractId, 'call-graph.json')) {
+							if (analysisCreated && dotFileCreated) {
+								debugInfo(contractId, `Call graph file detected: ${path}`);
+
+								const tokenName = /contract ([A-Za-z0-0_]+) is ERC20/g.exec(mainFileContent)[1];
+
+								debugInfo(contractId, `Token name detected: ${tokenName}`);
+
+								const data = JSON.parse(await readFileAsync(path));
+								const tokenData = data.objects.find((d) => d.name.startsWith('cluster') && d.name.endsWith(tokenName));
+
+								if (tokenData) {
+									const functionIds = tokenData.nodes;
+									const functionNames = data.objects
+										.filter((obj) => functionIds.includes(obj._gvid))
+										.filter((obj) => obj.label)
+										.filter((obj) => obj.label !== '\\N')
+										.map((obj) => obj.label);
+									await writeFileAsync(join(process.env.TMP_ROOT_DIR, contractId, 'function-names.json'), JSON.stringify(functionNames, null, 2));
+								}
+
+								setTimeout(() => {
+									resolve(contractId);
+								}, 1000);
+							}
+						}
 					});
+
+					childProcess.spawn('slither', [mainFileName, '--json', `${join('..', 'analysis')}.json`], options);
+					childProcess.spawn('slither', [mainFileName, '--print', `call-graph`], options);
 
 				}).catch(err => {
 					reject(err);

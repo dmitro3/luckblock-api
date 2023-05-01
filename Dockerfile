@@ -4,6 +4,8 @@ RUN apt-get update
 RUN apt-get -y install python3 python3-dev
 RUN apt-get -y install python3-pip
 
+RUN apt-get -y install graphviz
+
 RUN pip3 install solc-select
 RUN pip3 install slither-analyzer
 

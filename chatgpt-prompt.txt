@@ -6,7 +6,6 @@ Alternative code rules:
 
 - You should only be working on making the code (the function) better somehow without adding any modifiers.
 {{extrainfo}}
-
 Your answer should be in the EXACT following format (re-send the whole function and follow the same prettier rules so we can show a code diff with your fixes, explained fix is max 320 characters).
 
 Alternative code:

@@ -26,7 +26,7 @@ module.exports.triggerAuditReport = async function (contractId) {
 	const handleErr = (err) => {
 		console.log('ERR!');
 		console.error(err);
-		redisClient.del(contractId);
+		delete pending[contractId];
 	};
 
 	await cleanUp(contractId)

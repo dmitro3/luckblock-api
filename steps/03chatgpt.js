@@ -1,5 +1,5 @@
 const { join } = require('path');
-const { readFileAsync, writeFileAsync } = require('../util');
+const { readFileAsync, writeFileAsync, existsAsync } = require('../util');
 const { Configuration, OpenAIApi } = require('openai');
 const { debugInfo, nextStep } = require('../cache');
 
@@ -8,10 +8,20 @@ const configuration = new Configuration({
 });
 const openai = new OpenAIApi(configuration);
 
-const getSuggestion = async (contractId, mainFileContent, version, systemChatGptPrompt, detector, i) => {
+const getSuggestion = async (contractId, mainFileContent, version, systemChatGptPrompt, detector, i, functions) => {
+
+	let toAdd = '';
 
 	if (version.minor >= 8) {
-		systemChatGptPrompt = systemChatGptPrompt.replace('{{extrainfo}}', '- solidity version of the contract is 0.8 or higher, so never use the safemath lib in your code, use mathematical expressions.');
+		toAdd += '- solidity version of the contract is 0.8 or higher, so never use the safemath lib in your code, use mathematical expressions.\n';
+	}
+
+	if (functions) {
+		toAdd += `- You can create new functions if needed, but do not call functions that do not exist. List of existing functions in the contract : ${functions}\n`;
+	}
+	
+	if (toAdd) {
+		systemChatGptPrompt = systemChatGptPrompt.replace('{{extrainfo}}', toAdd);
 	} else {
 		systemChatGptPrompt = systemChatGptPrompt.replace('{{extrainfo}}', '');
 	}
@@ -65,6 +75,11 @@ module.exports = async function (contractId) {
 	const mainFileContent = await readFileAsync(join(process.env.TMP_ROOT_DIR, contractId, 'sources', mainFileName), 'utf-8');
 	const version = JSON.parse(await readFileAsync(join(process.env.TMP_ROOT_DIR, contractId, 'version.json'), 'utf-8'));
 
+	let functions = '';
+	if (await existsAsync(join(process.env.TMP_ROOT_DIR, contractId, 'function-names.json'))) {
+		functions = JSON.parse(await readFileAsync(join(process.env.TMP_ROOT_DIR, contractId, 'function-names.json'), 'utf-8')).join(', ');
+	}
+
 	const maxSuggestionCount = 4;
 	const acceptedConfidences = ['High', 'Medium'];
 	const acceptedImpacts = ['High', 'Medium', 'Low'];
@@ -75,7 +90,7 @@ module.exports = async function (contractId) {
 	const systemChatGptPrompt = await readFileAsync(join('chatgpt-prompt.txt'), 'utf-8');
 
 	const suggestions = (await Promise.all(highDetectors.map(async (detector, i) => {
-		return await getSuggestion(contractId, mainFileContent, version, systemChatGptPrompt, detector, i);
+		return await getSuggestion(contractId, mainFileContent, version, systemChatGptPrompt, detector, i, functions);
 	}))).filter(Boolean);
 
 	await writeFileAsync(join(process.env.TMP_ROOT_DIR, contractId, 'suggestions.json'), JSON.stringify(suggestions, null, 4), 'utf-8');
