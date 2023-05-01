@@ -15,7 +15,7 @@ module.exports.debugInfo = (contractId, info) => {
 
 setInterval(() => {
 	Object.keys(module.exports.pending).forEach(contractId => {
-		if (module.exports.startsAt[contractId] < Date.now() - 60 * 1000) {
+		if (module.exports.startsAt[contractId] < Date.now() - 60 * 1000 * 10) {
 			console.log(`[${chalk.redBright(`${contractId}`)}] Job timed out.`);
 			delete module.exports.pending[contractId];
 			delete module.exports.startsAt[contractId];
