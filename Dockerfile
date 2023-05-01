@@ -17,4 +17,4 @@ EXPOSE 3000
 
 RUN yarn install
 
-RUN node .
+CMD ["yarn", "start"]
