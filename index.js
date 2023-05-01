@@ -2,7 +2,7 @@ require('dotenv').config();
 
 const { triggerAuditReport } = require('./auditor');
 const { getCodeDiff } = require('./postgres');
-const { pending } = require('./cache');
+const { pending, startsAt } = require('./cache');
 const { existsAsync, readFileAsync, rmAsync } = require('./util');
 const { join } = require('path');
 const { readdirSync, existsSync } = require('fs');
@@ -21,6 +21,11 @@ fastify.post('/audit/:contractId', async (request, reply) => {
 
 	if (outputExists) {
 		return reply.send({ status: 'ended' });
+	}
+
+	const pendingExists = pending[contractId];
+	if (pendingExists) {
+		return reply.send({ status: 'pending' });
 	}
 
 	let count = Object.keys(pending).length;
@@ -92,7 +97,11 @@ fastify.post('/audit/:contractId/reset/:key', async (request, reply) => {
 
 	if (contractId === 'all') {
 		rmAsync(process.env.REPORTS_ROOT_DIR, { recursive: true });
+		pending = {};
+		startsAt = {};
 	} else {
+		delete pending[contractId];
+		delete startsAt[contractId];
 		if (await existsAsync(join(process.env.REPORTS_ROOT_DIR, `${contractId}.pdf`))) {
 			rmAsync(join(process.env.REPORTS_ROOT_DIR, `${contractId}.pdf`));
 		} else {
