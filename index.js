@@ -5,6 +5,7 @@ const { getCodeDiff } = require('./postgres');
 const { pending } = require('./cache');
 const { existsAsync, readFileAsync, rmAsync } = require('./util');
 const { join } = require('path');
+const { readdirSync, existsSync } = require('fs');
 
 const fastify = require('fastify')();
 
@@ -110,3 +111,10 @@ fastify.listen({
 	if (err) throw err;
 	console.log(`server listening on ${address}`);
 });
+
+if (existsSync(join(process.env.REPORTS_ROOT_DIR))) {
+	const reportCount = readdirSync(join(process.env.REPORTS_ROOT_DIR)).length;
+	console.log(`Found ${reportCount} reports`);
+} else {
+	console.log('No reports found');
+}
