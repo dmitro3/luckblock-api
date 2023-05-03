@@ -58,8 +58,10 @@ const getSuggestion = async (contractId, mainFileContent, version, systemChatGpt
 	const explanation = response.content.match(/Explained fix:\n```([\s\S.]*?)```/)?.[1]?.trim();
 
 	if (!fixedCode || !explanation) {
-		debugInfo(contractId, `ChatGPT did not return a valid response for ID ${i}`);
+		debugInfo(contractId, `ChatGPT has not returned a valid response for ID ${i}`);
 		return null;
+	} else {
+		debugInfo(contractId, `ChatGPT has returned a valid response for ID ${i}`);
 	}
 
 	return {

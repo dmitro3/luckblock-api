@@ -2,7 +2,7 @@ require('dotenv').config();
 
 const { triggerAuditReport } = require('./auditor');
 const { getCodeDiff } = require('./postgres');
-const { pending, startsAt } = require('./cache');
+let { pending, startsAt } = require('./cache');
 const { existsAsync, readFileAsync, rmAsync } = require('./util');
 const { join } = require('path');
 const { readdirSync, existsSync } = require('fs');
