@@ -48,7 +48,12 @@ const getSuggestion = async (contractId, mainFileContent, version, systemChatGpt
 	const completion = await openai.createChatCompletion({
 		model: 'gpt-4',
 		messages
-	});
+	}).catch(() => {});
+
+	if (!completion) {
+		debugInfo(contractId, `OpenAI sent a wrong response for ID ${i}`);
+		return null;
+	}
 
 	const response = completion.data.choices[0].message;
 
