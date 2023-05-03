@@ -11,15 +11,13 @@ RUN pip3 install slither-analyzer
 
 RUN solc-select install all
 
-RUN mkdir /app
+WORKDIR /app
 
 COPY package.json /app
 
 RUN yarn install
 
 COPY . /app
-
-WORKDIR /app
 
 EXPOSE 3000
 
