@@ -13,13 +13,13 @@ const getSuggestion = async (contractId, mainFileContent, version, systemChatGpt
 	let toAdd = '';
 
 	if (version.minor >= 8) {
-		toAdd += '- solidity version of the contract is 0.8 or higher, so never use the safemath lib in your code, use mathematical expressions.\n';
+		toAdd += '- Solidity version of the contract is 0.8 or higher, so never use the safemath lib in your code, use mathematical expressions.\n';
 	}
 
 	if (functions) {
-		toAdd += `- You can create new functions if needed, but do not call functions that do not exist. List of existing functions in the contract : ${functions}\n`;
+		toAdd += `- You can only use the following functions included in the class : ${functions}\n`;
 	}
-	
+
 	if (toAdd) {
 		systemChatGptPrompt = systemChatGptPrompt.replace('{{extrainfo}}', toAdd);
 	} else {
