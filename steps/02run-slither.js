@@ -47,9 +47,10 @@ module.exports = function (contractId) {
 					let analysisCreatePromise = new Promise((resolve) => {
 						analysisCreatePromiseResolve = resolve;
 					});
+
+					let dotConvertStarted = false;
 	
 					watcher.on('add', async (path) => {
-						debugInfo(contractId, `File detected: ${path}`);
 						if (path === join(process.env.TMP_ROOT_DIR, contractId, 'analysis.json')) {
 							analysisCreated = true;
 							debugInfo(contractId, `Analysis file detected: ${path}`);
@@ -58,15 +59,18 @@ module.exports = function (contractId) {
 						} else if (
 							path.endsWith('all_contracts.call-graph.dot')
 						) {
-							debugInfo(contractId, `Call graph file detected: ${path}`);
-							setTimeout(() => {
-								debugInfo(contractId, `Converting call graph (${path}) file to JSON...`);
-								childProcess.spawn('dot', ['-Tdot_json', path, '-o', `${join(process.env.TMP_ROOT_DIR, contractId, 'call-graph')}.json`], options);
-							}, 1000);
+							
+							// for instance Floki.sol.all_contracts, etc. = main.sol.all_contracts (we only need one)
+							if (dotConvertStarted) return;
+							dotConvertStarted = true;
+	
+							debugInfo(contractId, `Call graph DOT file detected: ${path}`);
+							debugInfo(contractId, `Converting call DOT file to JSON...`);
+							childProcess.spawn('dot', ['-Tdot_json', path, '-o', `${join(process.env.TMP_ROOT_DIR, contractId, 'call-graph')}.json`], options);
 						} else if (path === join(process.env.TMP_ROOT_DIR, contractId, 'call-graph.json')) {
-							debugInfo(contractId, `Call graph file detected: ${path}`);
+							debugInfo(contractId, `Call graph JSON file detected: ${path}`);
 
-							const tokenName = /contract ([A-Za-z0-0_]+) is ERC20/g.exec(mainFileContent)[1];
+							const tokenName = /contract ([A-Za-z0-0_]+) is I?ERC20/g.exec(mainFileContent)[1];
 
 							debugInfo(contractId, `Token name detected: ${tokenName}`);
 
@@ -93,7 +97,7 @@ module.exports = function (contractId) {
 					});
 
 					childProcess.spawn('slither', [mainFileName, '--json', `${join('..', 'analysis')}.json`], options);
-					childProcess.spawn('slither', [mainFileName, '--print', `call-graph`], options);
+					childProcess.spawn('slither', [mainFileName, '--print', `call-graph`], options).stderr.addListener('data', (err) => console.log(err.toString()))
 
 				}).catch(err => {
 					reject(err);
