@@ -267,7 +267,7 @@ module.exports = async function (contractId) {
 		
 	const pdfBytes = await pdfDoc.save();
 		
-	await writeFileAsync(join('reports', `${contractId}.pdf`), pdfBytes);
+	await writeFileAsync(join(process.env.REPORTS_ROOT_DIR, `${contractId}.pdf`), pdfBytes);
 
 	return contractId;
 
