@@ -60,8 +60,8 @@ module.exports = function (contractId) {
 						) {
 							debugInfo(contractId, `Call graph file detected: ${path}`);
 							setTimeout(() => {
-								debugInfo(contractId, `Converting call graph (${parse(path).base}) file to JSON...`);
-								childProcess.spawn('dot', ['-Tdot_json', parse(path).base, '-o', `${join('..', 'call-graph')}.json`], options);
+								debugInfo(contractId, `Converting call graph (${path}) file to JSON...`);
+								childProcess.spawn('dot', ['-Tdot_json', path, '-o', `${join(process.env.TMP_ROOT_DIR, contractId, 'call-graph')}.json`], options);
 							}, 1000);
 						} else if (path === join(process.env.TMP_ROOT_DIR, contractId, 'call-graph.json')) {
 							debugInfo(contractId, `Call graph file detected: ${path}`);
