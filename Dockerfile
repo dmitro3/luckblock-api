@@ -11,6 +11,8 @@ RUN pip3 install slither-analyzer
 
 RUN solc-select install all
 
+RUN mkdir /app
+
 COPY package.json /app
 
 RUN yarn install
