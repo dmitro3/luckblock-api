@@ -4,12 +4,16 @@ module.exports.startsAt = {};
 module.exports.pending = {};
 
 module.exports.nextStep = (contractId, step) => {
-	console.log(`[${chalk.greenBright(`${contractId}`)}] ${step} (step)`);
+	if (process.env.NODE_ENV !== 'test') {
+		console.log(`[${chalk.greenBright(`${contractId}`)}] ${step} (step)`);
+	}
 	module.exports.pending[contractId] = step;
 };
 
 module.exports.debugInfo = (contractId, info) => {
-	console.log(`[${chalk.cyanBright(`${contractId}`)}] ${info} (debug)`);
+	if (process.env.NODE_ENV !== 'test') {
+		console.log(`[${chalk.cyanBright(`${contractId}`)}] ${info} (debug)`);
+	}
 };
 
 

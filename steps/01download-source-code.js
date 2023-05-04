@@ -2,18 +2,28 @@ const { nextStep } = require('../cache');
 const { makeDirAsync, existsAsync, writeFileAsync } = require('../util');
 const { join } = require('path');
 
-module.exports = async function (contractId) {
-
-	nextStep(contractId, 'Downloading contract source code...');
-
-	if (!await existsAsync(process.env.TMP_ROOT_DIR)) await makeDirAsync(process.env.TMP_ROOT_DIR);
-
+const getData = async (contractId) => {
 	const res = await fetch(`https://api.etherscan.io/api?module=contract&action=getsourcecode&address=${contractId}`);
 	const data = await res.json();
 
 	if (data.result[0].ABI === 'Contract source code not verified') {
 		throw new Error('invalid_contract');
 	}
+
+	if (data.result === 'Max rate limit reached, please use API Key for higher rate limit') {
+		return getData(contractId);
+	}
+
+	return data;
+}
+
+module.exports = async function (contractId) {
+
+	nextStep(contractId, 'Downloading contract source code...');
+
+	if (!await existsAsync(process.env.TMP_ROOT_DIR)) await makeDirAsync(process.env.TMP_ROOT_DIR);
+
+	const data = await getData(contractId);
 
 	const sources = data.result[0].SourceCode.startsWith('{{') ? JSON.parse(data.result[0].SourceCode.slice(1, -1)).sources : {
 		'main.sol': {

@@ -100,7 +100,7 @@ module.exports = function (contractId) {
 					});
 
 					childProcess.spawn('slither', [mainFileName, '--json', `${join('..', 'analysis')}.json`], options);
-					childProcess.spawn('slither', [mainFileName, '--print', `call-graph`], options).stderr.addListener('data', (err) => console.log(err.toString()))
+					childProcess.spawn('slither', [mainFileName, '--print', `call-graph`], options);
 
 				}).catch(err => {
 					reject(err);

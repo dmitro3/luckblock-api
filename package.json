@@ -6,7 +6,8 @@
     "author": "Androz2091 <androz2091@gmail.com>",
     "license": "MIT",
     "scripts": {
-        "start": "node index.js"
+        "start": "node index.js",
+        "test": "jasmine"
     },
     "dependencies": {
         "@fastify/cors": "^8.2.1",
@@ -25,5 +26,8 @@
         "pdf-lib": "^1.17.1",
         "pg": "^8.10.0",
         "semver-parser": "^4.1.4"
+    },
+    "devDependencies": {
+        "jasmine": "^4.6.0"
     }
 }
