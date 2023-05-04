@@ -6,6 +6,8 @@ const { nextStep, debugInfo } = require('../cache');
 const { writeFileAsync, readFileAsync } = require('../util');
 const semver = import('semver-parser');
 
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
 module.exports = function (contractId) {
 
 	nextStep(contractId, 'Identifying major issues...');
@@ -74,6 +76,8 @@ module.exports = function (contractId) {
 
 							debugInfo(contractId, `Token name detected: ${tokenName}`);
 
+							await sleep(500);
+
 							const data = JSON.parse(await readFileAsync(path));
 							const tokenData = data.objects.find((d) => d.name.startsWith('cluster') && d.name.endsWith(tokenName));
 
@@ -87,12 +91,11 @@ module.exports = function (contractId) {
 								await writeFileAsync(join(process.env.TMP_ROOT_DIR, contractId, 'function-names.json'), JSON.stringify(functionNames, null, 2));
 							}
 
-							await analysisCreatePromise.then(() => {
-								setTimeout(() => {
-									watcher.close();
-									resolve(contractId);
-								}, 1000);
-							});
+							await analysisCreatePromise;
+							await sleep(500);
+
+							watcher.close();
+							resolve(contractId);
 						}
 					});
 
@@ -113,11 +116,11 @@ module.exports = function (contractId) {
 async function getVersion (mainFileContent) {
 	let finalVersion = '0.0.0';
 
-	const matchs = mainFileContent.match(/pragma solidity (\^)?([0-9.]+);/);
-	const [, caret, version] = matchs;
+	const matchs = mainFileContent.match(/pragma solidity (\^|\>\=)?([0-9.]+);/);
+	const [, symbol, version] = matchs;
 	const { parseSemVer } = await semver;
 	const { major, minor, patch } = parseSemVer(version);
-	if (caret) {
+	if (symbol === '^' || symbol === '>=') {
 		const versions = getVersions();
 		let newPatch = patch;
 		while (versions.includes(`${major}.${minor}.${newPatch+1}`)) {
