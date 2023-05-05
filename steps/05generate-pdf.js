@@ -37,9 +37,13 @@ module.exports = async function (contractId) {
 
 	let lastSuggestionEndedAt = topOfPage - 10;
 
+	const infoPageIdx = 0;
+	const goPlusPagesIdx = [3,4];
+	const suggestionsPageIdx = 5;
+
 	const annots = [];
 
-	pages[0].drawText(tokenAuditData.token_name, {
+	pages[infoPageIdx].drawText(tokenAuditData.token_name, {
 		size: 18,
 		x: 160,
 		y: 301,
@@ -48,7 +52,7 @@ module.exports = async function (contractId) {
 		font: obudaBoldFont
 	});
     
-	pages[0].drawText(tokenAuditData.token_symbol, {
+	pages[infoPageIdx].drawText(tokenAuditData.token_symbol, {
 		size: 18,
 		x: 180,
 		y: 262,
@@ -57,7 +61,7 @@ module.exports = async function (contractId) {
 		font: obudaBoldFont
 	});
     
-	pages[0].drawText(contractId, {
+	pages[infoPageIdx].drawText(contractId, {
 		size: 12,
 		x: 270,
 		y: 223,
@@ -69,7 +73,7 @@ module.exports = async function (contractId) {
 
 	for (let i = 0; i < suggestions.length; i++) {
 
-		pages[4].drawText(`Detection #${i+1}`, {
+		pages[suggestionsPageIdx].drawText(`Detection #${i+1}`, {
 			size: 20,
 			x: margin,
 			y: lastSuggestionEndedAt - 40,
@@ -80,7 +84,7 @@ module.exports = async function (contractId) {
 		});
 		lastSuggestionEndedAt = lastSuggestionEndedAt - 40;
 
-		pages[4].drawText(suggestions[i].content, {
+		pages[suggestionsPageIdx].drawText(suggestions[i].content, {
 			size: 10,
 			x: margin,
 			y: lastSuggestionEndedAt - 30,
@@ -93,7 +97,7 @@ module.exports = async function (contractId) {
 		const lines = breakTextIntoLines(suggestions[i].content, [' '], 400, (text) => obudaBoldFont.widthOfTextAtSize(text, 10));
 		const contentSize = lines.length * 14;
 
-		pages[4].drawText('Click here for code changes', {
+		pages[suggestionsPageIdx].drawText('Click here for code changes', {
 			size: 15,
 			x: margin,
 			y: lastSuggestionEndedAt - 10 - contentSize,
@@ -124,79 +128,16 @@ module.exports = async function (contractId) {
 
 	}
 
-	pages[4].node.set(PDFName.of('Annots'), pdfDoc.context.obj(annots));
+	pages[suggestionsPageIdx].node.set(PDFName.of('Annots'), pdfDoc.context.obj(annots));
 
 	const formatBoolean = (string) => string === '0' ? 'No' : 'Yes';
 	const isTrue = (string) => string !== '0';
 
-	const properties1 = [
-		{
-			label: 'Self destruct',
-			value: formatBoolean(tokenAuditData.selfdestruct),
-			isGreen: !isTrue(tokenAuditData.selfdestruct)
-		},
-		{
-			label: 'External call risk',
-			value: formatBoolean(tokenAuditData.external_call),
-			isGreen: !isTrue(tokenAuditData.external_call)
-		},
-		{
-			label: 'Buy available',
-			value: formatBoolean(!tokenAuditData.cannot_buy),
-			isGreen: !isTrue(!tokenAuditData.cannot_buy)
-		},
-		{
-			label: 'Max sell ratio',
-			value: formatBoolean(tokenAuditData.cannot_sell_all),
-			isGreen: isTrue(tokenAuditData.cannot_sell_all)
-		},
-		{
-			label: 'Tax modifiable',
-			value: formatBoolean(tokenAuditData.slippage_modifiable),
-			isGreen: !isTrue(tokenAuditData.slippage_modifiable)
-		},
-		{
-			label: 'Transfer pausable',
-			value: formatBoolean(tokenAuditData.transfer_pausable),
-			isGreen: !isTrue(tokenAuditData.transfer_pausable)
-		},
-		{
-			label: 'Blacklisted',
-			value: formatBoolean(tokenAuditData.is_blacklisted),
-			isGreen: !isTrue(tokenAuditData.is_blacklisted)
-		},
-		{
-			label: 'Trading cooldown',
-			value: formatBoolean(tokenAuditData.trading_cooldown),
-			isGreen: !isTrue(tokenAuditData.trading_cooldown)
-		},
-		{
-			label: 'Personal tax modifiable',
-			value: formatBoolean(tokenAuditData.personal_slippage_modifiable),
-			isGreen: !isTrue(tokenAuditData.personal_slippage_modifiable)
-		}
-	];
-
-	const properties2 = [
-		{
+	const properties = [
+		[{
 			label: 'Contract verified',
 			value: formatBoolean(tokenAuditData.is_open_source),
 			isGreen: isTrue(tokenAuditData.is_open_source)
-		},
-		{
-			label: 'Honeypot',
-			value: formatBoolean(tokenAuditData.is_honeypot),
-			isGreen: !isTrue(tokenAuditData.is_honeypot)
-		},
-		{
-			label: 'Buy tax',
-			value: tokenAuditData.buy_tax + '%',
-			isGreen: false
-		},
-		{
-			label: 'Sell tax',
-			value: tokenAuditData.sell_tax + '%',
-			isGreen: false
 		},
 		{
 			label: 'Proxy contract',
@@ -222,47 +163,89 @@ module.exports = async function (contractId) {
 			label: 'Hidden owner',
 			value: formatBoolean(tokenAuditData.hidden_owner),
 			isGreen: !isTrue(tokenAuditData.hidden_owner)
-		}
+		},
+		{
+			label: 'Self destruct',
+			value: formatBoolean(tokenAuditData.selfdestruct),
+			isGreen: !isTrue(tokenAuditData.selfdestruct)
+		},
+		{
+			label: 'External call risk',
+			value: formatBoolean(tokenAuditData.external_call),
+			isGreen: !isTrue(tokenAuditData.external_call)
+		}],
+		[{
+			label: 'Honeypot',
+			value: formatBoolean(tokenAuditData.is_honeypot),
+			isGreen: !isTrue(tokenAuditData.is_honeypot)
+		},
+		{
+			label: 'Buy tax',
+			value: tokenAuditData.buy_tax + '%',
+			isGreen: tokenAuditData.sell_tax === '0'
+		},
+		{
+			label: 'Sell tax',
+			value: tokenAuditData.sell_tax + '%',
+			isGreen: tokenAuditData.sell_tax === '0'
+		},
+		{
+			label: 'Buy available',
+			value: formatBoolean(!tokenAuditData.cannot_buy),
+			isGreen: !isTrue(tokenAuditData.cannot_buy)
+		},
+		{
+			label: 'Max sell ratio',
+			value: formatBoolean(tokenAuditData.cannot_sell_all),
+			isGreen: !isTrue(tokenAuditData.cannot_sell_all)
+		},
+		{
+			label: 'Tax modifiable',
+			value: formatBoolean(tokenAuditData.slippage_modifiable),
+			isGreen: !isTrue(tokenAuditData.slippage_modifiable)
+		},
+		{
+			label: 'Transfer pausable',
+			value: formatBoolean(tokenAuditData.transfer_pausable),
+			isGreen: !isTrue(tokenAuditData.transfer_pausable)
+		},
+		{
+			label: 'Blacklisted',
+			value: formatBoolean(tokenAuditData.is_blacklisted),
+			isGreen: !isTrue(tokenAuditData.is_blacklisted)
+		},
+		{
+			label: 'Trading cooldown',
+			value: formatBoolean(tokenAuditData.trading_cooldown),
+			isGreen: !isTrue(tokenAuditData.trading_cooldown)
+		},
+		{
+			label: 'Personal tax modifiable',
+			value: formatBoolean(tokenAuditData.personal_slippage_modifiable),
+			isGreen: !isTrue(tokenAuditData.personal_slippage_modifiable)
+		}]
 	];
 
-	for (let i = 0; i < properties1.length; i++) {
-		pages[2].drawText(properties1[i].label, {
-			size: 20,
-			x: margin,
-			y: topOfPage - 50 - i*60,
-			maxWidth: 400,
-			lineHeight: 12,
-			font: obudaBoldFont,
-		});
-		pages[2].drawText(properties1[i].value, {
-			size: 12,
-			x: margin + 10,
-			y: topOfPage - 50 - i*60 - 20,
-			maxWidth: 400,
-			lineHeight: 12,
-			font: obudaBoldFont,
-			color: properties1[i].isGreen ? rgb(...[0, 128, 0].map((e) => e / 255)) : rgb(...[255, 0, 0].map((e) => e / 255))
-		});
-	}
-
-	for (let i = 0; i < properties2.length; i++) {
-		pages[3].drawText(properties2[i].label, {
-			size: 20,
-			x: margin,
-			y: topOfPage - 50 - i*60,
-			maxWidth: 400,
-			lineHeight: 12,
-			font: obudaBoldFont,
-		});
-		pages[3].drawText(properties2[i].value, {
-			size: 12,
-			x: margin + 10,
-			y: topOfPage - 50 - i*60 - 20,
-			maxWidth: 400,
-			lineHeight: 12,
-			font: obudaBoldFont,
-			color: properties2[i].isGreen ? rgb(...[0, 128, 0].map((e) => e / 255)) : rgb(...[255, 0, 0].map((e) => e / 255))
-		});
+	for (let i = 0; i < properties.length; i++) {
+		for (let j = 0; j < properties[i].length; j++) {
+			pages[goPlusPagesIdx[i]].drawText(properties[i][j].label, {
+				size: 20,
+				x: margin,
+				y: topOfPage - 50 - j*55,
+				maxWidth: 400,
+				lineHeight: 12,
+				font: obudaBoldFont,
+			});
+			pages[goPlusPagesIdx[i]].drawText(properties[i][j].value, {
+				size: 20,
+				x: margin + 300,
+				y: topOfPage - 50 - j*55,
+				maxWidth: 400,
+				lineHeight: 12,
+				font: obudaBoldFont,
+				color: properties[i][j].isGreen ? rgb(...[0, 128, 0].map((e) => e / 255)) : rgb(...[255, 0, 0].map((e) => e / 255))
+			});
+		}
 	}
 		
 	const pdfBytes = await pdfDoc.save();
