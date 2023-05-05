@@ -1,0 +1,10 @@
+https://bloxy.info/list_tokens/ERC20
+
+const tokens = document.querySelectorAll('tr');
+let tokensL = [];
+for (let i = 1; i< tokens.length; i++) {
+    const link = tokens[i].children[0].children[0].href;
+    const address = /https:\/\/bloxy\.info\/token_holders\/([0-9a-zA-Z)]+)/.exec(link)[1];
+    tokensL.push(address);
+}
+console.log(JSON.stringify(tokensL))
