@@ -103,7 +103,7 @@ module.exports = function (contractId) {
 							}
 
 							await analysisCreatePromise;
-							await sleep(500);
+							await sleep(1000);
 
 							watcher.close();
 							resolve(contractId);
