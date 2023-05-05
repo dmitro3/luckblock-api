@@ -72,14 +72,25 @@ module.exports = function (contractId) {
 						} else if (path === join(process.env.TMP_ROOT_DIR, contractId, 'call-graph.json')) {
 							debugInfo(contractId, `Call graph JSON file detected: ${path}`);
 
-							const tokenName = /contract ([A-Za-z0-0_]+) is I?ERC20/g.exec(mainFileContent)[1];
+							const data = JSON.parse(await readFileAsync(path));
+
+							let tokenName = /contract ([A-Za-z0-0_]+) is I?ERC20/g.exec(mainFileContent)?.[1];
+							let tokenData = null;
+
+							if (tokenName) {
+								tokenData = data.objects.find((d) => d.name.startsWith('cluster') && d.name.endsWith(tokenName));
+							} else {
+								tokenData = data.objects
+								.filter((d) => d.name.startsWith('cluster') && d.nodes)
+								.sort((a, b) => b.nodes.length - a.nodes.length)[0];
+
+								const beforeText = /cluster_[0-9]+_/g.exec(tokenData.name)?.[0];
+								tokenName = tokenData.name.replace(beforeText, '');
+							}
 
 							debugInfo(contractId, `Token name detected: ${tokenName}`);
 
 							await sleep(500);
-
-							const data = JSON.parse(await readFileAsync(path));
-							const tokenData = data.objects.find((d) => d.name.startsWith('cluster') && d.name.endsWith(tokenName));
 
 							if (tokenData) {
 								const functionIds = tokenData.nodes;
