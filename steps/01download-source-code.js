@@ -43,7 +43,10 @@ module.exports = async function (contractId) {
 		await writeFileAsync(join(process.env.TMP_ROOT_DIR, contractId, 'sources', key), content, 'utf-8');
 	}
 
-	const mainFile = Object.keys(sources)[0] || 'main.sol';
+	let mainFile = Object.keys(sources)[0] || 'main.sol';
+	if (mainFile.startsWith('/')) {
+		mainFile = mainFile.slice(1);
+	}
 	await writeFileAsync(join(process.env.TMP_ROOT_DIR, contractId, 'main.txt'), mainFile, 'utf-8');
 
 	return contractId;
