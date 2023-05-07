@@ -19,6 +19,7 @@
         "diff-match-patch": "^1.0.5",
         "dotenv": "^16.0.3",
         "fastify": "^4.16.3",
+        "https-proxy-agent": "^6.1.0",
         "node-fetch": "2.6.9",
         "openai": "^3.2.1",
         "pako": "^2.1.0",

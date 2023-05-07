@@ -1,9 +1,18 @@
-const { nextStep } = require('../cache');
+const { nextStep, debugInfo } = require('../cache');
 const { makeDirAsync, existsAsync, writeFileAsync } = require('../util');
 const { join } = require('path');
+const fetch = require('node-fetch');
+const { HttpsProxyAgent } = require('https-proxy-agent');
 
 const getData = async (contractId) => {
-	const res = await fetch(`https://api.etherscan.io/api?module=contract&action=getsourcecode&address=${contractId}`);
+
+	if (process.env.PROXY_URL) {
+		debugInfo(contractId, 'Fetching using proxy...');
+	}
+
+	const res = await fetch(`https://api.etherscan.io/api?module=contract&action=getsourcecode&address=${contractId}`, {
+		agent: process.env.PROXY_URL ? new HttpsProxyAgent(process.env.PROXY_URL) : null
+	});
 	const data = await res.json();
 
 	if (data.result[0].ABI === 'Contract source code not verified') {
@@ -21,8 +30,6 @@ module.exports = async function (contractId) {
 
 	nextStep(contractId, 'Downloading contract source code...');
 
-	if (!await existsAsync(process.env.TMP_ROOT_DIR)) await makeDirAsync(process.env.TMP_ROOT_DIR);
-
 	const data = await getData(contractId);
 
 	const sources = data.result[0].SourceCode.startsWith('{{') ? JSON.parse(data.result[0].SourceCode.slice(1, -1)).sources : {
@@ -30,7 +37,6 @@ module.exports = async function (contractId) {
 			content: data.result[0].SourceCode
 		}
 	};
-	if (!await existsAsync(join(process.env.TMP_ROOT_DIR, contractId))) await makeDirAsync(join(process.env.TMP_ROOT_DIR, contractId));
 	if (!await existsAsync(join(process.env.TMP_ROOT_DIR, contractId, 'sources'))) await makeDirAsync(join(process.env.TMP_ROOT_DIR, contractId, 'sources'));
 	for(let key in sources) {
 		const content = sources[key].content;

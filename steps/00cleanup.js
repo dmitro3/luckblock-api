@@ -1,5 +1,5 @@
 const { nextStep } = require('../cache');
-const { existsAsync, rmAsync } = require('../util');
+const { existsAsync, rmAsync, makeDirAsync } = require('../util');
 const { join } = require('path');
 
 module.exports = async function (contractId) {
@@ -12,6 +12,12 @@ module.exports = async function (contractId) {
 	) {
 		await rmAsync(join(process.env.TMP_ROOT_DIR, contractId), { recursive: true });
 	}
+
+	if (!(await existsAsync(process.env.TMP_ROOT_DIR))) {
+		await makeDirAsync(process.env.TMP_ROOT_DIR);
+	}
+
+	await makeDirAsync(join(process.env.TMP_ROOT_DIR, contractId));
 
 	return contractId;
 
