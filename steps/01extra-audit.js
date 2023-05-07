@@ -9,16 +9,16 @@ module.exports = async function (contractId) {
 
 	const tokenAuditRes = await fetch(`https://dapp.herokuapp.com/token-audit?contract=${contractId}`).catch(() => {});
 
-	if (!tokenAuditData) {
+	if (!tokenAuditRes) {
 		debugInfo(contractId, 'Failed to get token audit data');
-		throw new Error('invalid_contract');
+		throw new Error('unsupported_contract');
 	}
 
 	const tokenAuditData = await tokenAuditRes.json();
 
 	if (!tokenAuditData.is_open_source) {
 		debugInfo(contractId, 'Contract is not verified');
-		throw new Error('invalid_contract');
+		throw new Error('unverified_contract');
 	}
 
 	debugInfo(contractId, 'Contract is verified and token audit data is available');

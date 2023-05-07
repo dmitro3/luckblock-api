@@ -1,6 +1,6 @@
 /* eslint-disable no-undef */
 
-const [ cleanUp, downloadSourceCode, runSlither ] = [
+const [ cleanUp, extraAudit, downloadSourceCode, runSlither ] = [
 	require('../../steps/00cleanup'),
 	require('../../steps/01extra-audit'),
 	require('../../steps/02download-source-code'),
@@ -10,7 +10,7 @@ const [ cleanUp, downloadSourceCode, runSlither ] = [
 const dotenv = require('dotenv');
 dotenv.config();
 
-//process.env.NODE_ENV = 'test';
+process.env.NODE_ENV = 'test';
 
 describe('testing contracts', () => {
 
@@ -21,10 +21,16 @@ describe('testing contracts', () => {
 		it(contractId, () => {
 
 			return cleanUp(contractId)
+				.then(extraAudit)
 				.then(downloadSourceCode)
 				.then(runSlither)
 				.then((contractIdFinal) => {
-					expect(contractIdFinal).toBe(contractId);
+					expect(contractIdFinal)
+						.withContext('unknown error')
+						.toBe(contractId);
+				})
+				.catch((err) => {
+					throw err;
 				});
             
 		}, 20000);

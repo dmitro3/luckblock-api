@@ -67,11 +67,8 @@ module.exports = function (contractId) {
 	
 							debugInfo(contractId, `Call graph DOT file detected: ${path}`);
 							debugInfo(contractId, 'Converting call DOT file to JSON...');
-							childProcess.spawn('dot', ['-Tdot_json', path, '-o', `${join(process.env.TMP_ROOT_DIR, contractId, 'call-graph')}.json`], options)
-								.stderr
-								.on('data', (data) => {
-									console.log(data.toString());
-								});
+							childProcess.spawn('dot', ['-Tdot_json', path, '-o', `${join(process.env.TMP_ROOT_DIR, contractId, 'call-graph')}.json`], options);
+
 						} else if (path === join(process.env.TMP_ROOT_DIR, contractId, 'call-graph.json')) {
 							debugInfo(contractId, `Call graph JSON file detected: ${path}`);
 
@@ -114,11 +111,7 @@ module.exports = function (contractId) {
 					});
 
 					childProcess.spawn('slither', [mainFileName, '--json', `${join('..', 'analysis')}.json`], options);
-					childProcess.spawn('slither', [mainFileName, '--print', 'call-graph'], options)
-						.stderr
-						.on('data', (data) => {
-							console.log(data.toString());
-						});
+					childProcess.spawn('slither', [mainFileName, '--print', 'call-graph'], options);
 
 				}).catch(err => {
 					reject(err);
