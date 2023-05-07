@@ -36,6 +36,10 @@ module.exports = async function (contractId) {
 		await writeFileAsync(join(process.env.TMP_ROOT_DIR, contractId, 'sourcecode.json'), JSON.stringify(data, null, 2), 'utf-8');
 	}
 
+	if (data.result[0].SourceCode.includes('vyper')) {
+		throw new Error('unsupported_vyper_contract');
+	}
+
 	const sources = data.result[0].SourceCode.startsWith('{{') ? JSON.parse(data.result[0].SourceCode.slice(1, -1)).sources : 
 		data.result[0].SourceCode.startsWith('{') ? JSON.parse(data.result[0].SourceCode) : {
 			'main.sol': {
