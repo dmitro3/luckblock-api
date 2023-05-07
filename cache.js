@@ -2,6 +2,7 @@ const chalk = require('chalk');
 
 module.exports.startsAt = {};
 module.exports.pending = {};
+module.exports.errors = {};
 
 module.exports.nextStep = (contractId, step) => {
 	if (process.env.NODE_ENV !== 'test') {

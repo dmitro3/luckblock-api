@@ -2,7 +2,7 @@ require('dotenv').config();
 
 const { triggerAuditReport } = require('./auditor');
 const { getCodeDiff } = require('./postgres');
-let { pending, startsAt } = require('./cache');
+let { pending, startsAt, errors } = require('./cache');
 const { existsAsync, readFileAsync, rmAsync } = require('./util');
 const { join } = require('path');
 const { readdirSync, existsSync } = require('fs');
@@ -50,6 +50,11 @@ fastify.get('/audit/:contractId/status', async (request, reply) => {
 	}
 
 	const status = pending[contractId];
+	const error = errors[contractId];
+
+	if (error) {
+		return reply.send({ error, status: 'errored' });
+	}
     
 	reply.send({ status: status || 'unknown' });
 });

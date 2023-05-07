@@ -1,4 +1,4 @@
-const { pending, startsAt, debugInfo } = require('./cache');
+const { pending, startsAt, debugInfo, errors } = require('./cache');
 
 const [
 	cleanUp,
@@ -40,6 +40,10 @@ module.exports.triggerAuditReport = async function (contractId) {
 			delete startsAt[contractId];
 			debugInfo(contractId, `Done in ${(Date.now() - startAt) / 1000} seconds`);
 		})
-		.catch(handleErr);
+		.catch((err) => {
+			handleErr(err);
+			const msg = err.message || err;
+			errors[contractId] = msg;
+		});
 
 };
