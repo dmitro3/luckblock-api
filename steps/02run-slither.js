@@ -1,4 +1,4 @@
-const { join, parse } = require('path');
+const { join } = require('path');
 const chokidar = require('chokidar');
 const childProcess = require('child_process');
 const { readFile } = require('fs');
@@ -54,7 +54,6 @@ module.exports = function (contractId) {
 	
 					watcher.on('add', async (path) => {
 						if (path === join(process.env.TMP_ROOT_DIR, contractId, 'analysis.json')) {
-							analysisCreated = true;
 							debugInfo(contractId, `Analysis file detected: ${path}`);
 
 							analysisCreatePromiseResolve();
@@ -67,7 +66,7 @@ module.exports = function (contractId) {
 							dotConvertStarted = true;
 	
 							debugInfo(contractId, `Call graph DOT file detected: ${path}`);
-							debugInfo(contractId, `Converting call DOT file to JSON...`);
+							debugInfo(contractId, 'Converting call DOT file to JSON...');
 							childProcess.spawn('dot', ['-Tdot_json', path, '-o', `${join(process.env.TMP_ROOT_DIR, contractId, 'call-graph')}.json`], options);
 						} else if (path === join(process.env.TMP_ROOT_DIR, contractId, 'call-graph.json')) {
 							debugInfo(contractId, `Call graph JSON file detected: ${path}`);
@@ -81,8 +80,8 @@ module.exports = function (contractId) {
 								tokenData = data.objects.find((d) => d.name.startsWith('cluster') && d.name.endsWith(tokenName));
 							} else {
 								tokenData = data.objects
-								.filter((d) => d.name.startsWith('cluster') && d.nodes)
-								.sort((a, b) => b.nodes.length - a.nodes.length)[0];
+									.filter((d) => d.name.startsWith('cluster') && d.nodes)
+									.sort((a, b) => b.nodes.length - a.nodes.length)[0];
 
 								const beforeText = /cluster_[0-9]+_/g.exec(tokenData.name)?.[0];
 								tokenName = tokenData.name.replace(beforeText, '');
@@ -111,7 +110,7 @@ module.exports = function (contractId) {
 					});
 
 					childProcess.spawn('slither', [mainFileName, '--json', `${join('..', 'analysis')}.json`], options);
-					childProcess.spawn('slither', [mainFileName, '--print', `call-graph`], options);
+					childProcess.spawn('slither', [mainFileName, '--print', 'call-graph'], options);
 
 				}).catch(err => {
 					reject(err);
@@ -127,7 +126,7 @@ module.exports = function (contractId) {
 async function getVersion (mainFileContent) {
 	let finalVersion = '0.0.0';
 
-	const matchs = mainFileContent.match(/pragma solidity (\^|\>\=)?([0-9.]+);/);
+	const matchs = mainFileContent.match(/pragma solidity (\^|>=)?([0-9.]+);/);
 	const [, symbol, version] = matchs;
 	const { parseSemVer } = await semver;
 	const { major, minor, patch } = parseSemVer(version);

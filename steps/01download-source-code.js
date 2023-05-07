@@ -15,7 +15,7 @@ const getData = async (contractId) => {
 	}
 
 	return data;
-}
+};
 
 module.exports = async function (contractId) {
 
