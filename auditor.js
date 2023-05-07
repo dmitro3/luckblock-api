@@ -9,10 +9,10 @@ const [
 	generatePDF
 ] = [
 	require('./steps/00cleanup'),
+	require('./steps/01extra-audit'),
 	require('./steps/02download-source-code'),
-	require('./steps/04run-slither'),
-	require('./steps/03chatgpt'),
-	require('./steps/00extra-audit'),
+	require('./steps/03run-slither'),
+	require('./steps/04chatgpt'),
 	require('./steps/05generate-pdf')
 ];
 
