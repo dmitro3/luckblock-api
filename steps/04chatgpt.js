@@ -78,7 +78,7 @@ const getSuggestion = async (contractId, mainFileContent, version, systemChatGpt
 
 };
 
-module.exports = async function (contractId) {
+module.exports = async function ([contractId]) {
 
 	nextStep(contractId, 'Our AI is generating suggestions...');
 
