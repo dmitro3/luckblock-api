@@ -97,9 +97,10 @@ module.exports = function (contractId) {
 
 							await sleep(500);
 
+							let functionNames = [];
 							if (tokenData) {
 								const functionIds = tokenData.nodes;
-								const functionNames = data.objects
+								functionNames = data.objects
 									.filter((obj) => functionIds.includes(obj._gvid))
 									.filter((obj) => obj.label)
 									.filter((obj) => obj.label !== '\\N')
@@ -111,7 +112,9 @@ module.exports = function (contractId) {
 							await sleep(1000);
 
 							watcher.close();
-							resolve(contractId);
+							resolve([contractId, {
+								functionNames
+							}]);
 						}
 					});
 
