@@ -51,6 +51,15 @@
 }
 ```
 
+* Errored
+
+```json
+{
+    "status": "errored",
+    "error": "This contract is written in Vyper, which is not supported yet."
+}
+```
+
 * Ended
 
 ```json
