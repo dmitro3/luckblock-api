@@ -100,7 +100,8 @@ module.exports = function (contractId) {
 							const functionNames = data.objects
 								.filter((obj) => !obj.nodes?.length)
 								.filter((obj) => obj.label)
-								.filter((obj) => obj.label !== '\\N' && obj.label !== 'DOMAIN_SEPARATOR')
+								.filter((obj) => obj.label !== '\\N')
+								.filter((obj) => obj.label.toUpperCase() !== obj.label)
 								.filter((obj) => obj.name.match(/[0-9]+_(?:_)?[0-9a-zA-Z]+/g))
 								.map((obj) => obj.label);
 							await writeFileAsync(join(process.env.TMP_ROOT_DIR, contractId, 'function-names.json'), JSON.stringify(functionNames, null, 2));

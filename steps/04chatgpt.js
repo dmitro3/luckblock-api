@@ -1,5 +1,5 @@
 const { join } = require('path');
-const { readFileAsync, writeFileAsync, existsAsync } = require('../util');
+const { readFileAsync, writeFileAsync } = require('../util');
 const { Configuration, OpenAIApi } = require('openai');
 const { debugInfo, nextStep } = require('../cache');
 
@@ -88,12 +88,14 @@ module.exports = async function (contractId) {
 	const version = JSON.parse(await readFileAsync(join(process.env.TMP_ROOT_DIR, contractId, 'version.json'), 'utf-8'));
 
 	let functions = '';
+	/*
 	if (await existsAsync(join(process.env.TMP_ROOT_DIR, contractId, 'function-names.json'))) {
 		const parsedFunctions = JSON.parse(await readFileAsync(join(process.env.TMP_ROOT_DIR, contractId, 'function-names.json'), 'utf-8'));
 		if (parsedFunctions.length) {
 			functions = parsedFunctions.join(', ');
 		}
 	}
+	*/
 
 	const maxSuggestionCount = 4;
 	const acceptedConfidences = ['High', 'Medium'];
