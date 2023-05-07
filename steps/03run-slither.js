@@ -67,8 +67,13 @@ module.exports = function (contractId) {
 	
 							debugInfo(contractId, `Call graph DOT file detected: ${path}`);
 							debugInfo(contractId, 'Converting call DOT file to JSON...');
-							childProcess.spawn('dot', ['-Tdot_json', path, '-o', `${join(process.env.TMP_ROOT_DIR, contractId, 'call-graph')}.json`], options);
-
+							childProcess.spawn('dot', ['-Tdot_json', path, '-o', `${join(process.env.TMP_ROOT_DIR, contractId, 'call-graph')}.json`], options)
+								.stderr
+								.on('data', (data) => {
+									if (process.env.NODE_ENV === 'superdebug') {
+										console.log(data.toString());
+									}
+								});
 						} else if (path === join(process.env.TMP_ROOT_DIR, contractId, 'call-graph.json')) {
 							debugInfo(contractId, `Call graph JSON file detected: ${path}`);
 
@@ -110,8 +115,20 @@ module.exports = function (contractId) {
 						}
 					});
 
-					childProcess.spawn('slither', [mainFileName, '--json', `${join('..', 'analysis')}.json`], options);
-					childProcess.spawn('slither', [mainFileName, '--print', 'call-graph'], options);
+					childProcess.spawn('slither', [mainFileName, '--json', `${join('..', 'analysis')}.json`], options)
+						.stderr
+						.on('data', (data) => {
+							if (process.env.NODE_ENV === 'superdebug') {
+								console.log(data.toString());
+							}
+						});
+					childProcess.spawn('slither', [mainFileName, '--print', 'call-graph'], options)
+						.stderr
+						.on('data', (data) => {
+							if (process.env.NODE_ENV === 'superdebug') {
+								console.log(data.toString());
+							}
+						});
 
 				}).catch(err => {
 					reject(err);
@@ -127,7 +144,7 @@ module.exports = function (contractId) {
 async function getVersion (mainFileContent) {
 	let finalVersion = '0.0.0';
 
-	const matchs = mainFileContent.match(/pragma solidity (\^|>=)?([0-9.]+);/);
+	const matchs = /(?<!\/\/\s)pragma solidity (\^|>=|=)?([0-9.]+);/g.exec(mainFileContent);
 	const [, symbol, version] = matchs;
 	const { parseSemVer } = await semver;
 	const { major, minor, patch } = parseSemVer(version);

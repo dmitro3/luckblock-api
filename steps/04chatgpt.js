@@ -89,7 +89,10 @@ module.exports = async function (contractId) {
 
 	let functions = '';
 	if (await existsAsync(join(process.env.TMP_ROOT_DIR, contractId, 'function-names.json'))) {
-		functions = JSON.parse(await readFileAsync(join(process.env.TMP_ROOT_DIR, contractId, 'function-names.json'), 'utf-8')).join(', ');
+		const parsedFunctions = JSON.parse(await readFileAsync(join(process.env.TMP_ROOT_DIR, contractId, 'function-names.json'), 'utf-8'));
+		if (parsedFunctions.length) {
+			functions = parsedFunctions.join(', ');
+		}
 	}
 
 	const maxSuggestionCount = 4;

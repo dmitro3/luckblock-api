@@ -32,11 +32,16 @@ module.exports = async function (contractId) {
 
 	const data = await getData(contractId);
 
-	const sources = data.result[0].SourceCode.startsWith('{{') ? JSON.parse(data.result[0].SourceCode.slice(1, -1)).sources : {
-		'main.sol': {
-			content: data.result[0].SourceCode
-		}
-	};
+	if (process.env.NODE_ENV === 'superdebug') {
+		await writeFileAsync(join(process.env.TMP_ROOT_DIR, contractId, 'sourcecode.json'), JSON.stringify(data, null, 2), 'utf-8');
+	}
+
+	const sources = data.result[0].SourceCode.startsWith('{{') ? JSON.parse(data.result[0].SourceCode.slice(1, -1)).sources : 
+		data.result[0].SourceCode.startsWith('{') ? JSON.parse(data.result[0].SourceCode) : {
+			'main.sol': {
+				content: data.result[0].SourceCode
+			}
+		};
 	if (!await existsAsync(join(process.env.TMP_ROOT_DIR, contractId, 'sources'))) await makeDirAsync(join(process.env.TMP_ROOT_DIR, contractId, 'sources'));
 	for(let key in sources) {
 		const content = sources[key].content;
