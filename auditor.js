@@ -43,16 +43,17 @@ module.exports.triggerAuditReport = async function (contractId) {
 		})
 		.catch((err) => {
 			handleErr(err);
+
 			const msg = err.message || err;
 
-			const errors = {
+			const errorMessages = {
 				'unsupported_contract': 'This contract is not supported.',
 				'unverified_contract': 'The code of this contract is not verified.',
 				'invalid_contract': 'The code of this contract is invalid.',
 				'unsupported_vyper_contract': 'This contract is written in Vyper, which is not supported yet.'
 			};
 
-			errors[contractId] = errors[msg] || msg;
+			errors[contractId] = errorMessages[msg] || msg;
 		});
 
 };
