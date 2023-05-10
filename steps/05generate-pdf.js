@@ -94,8 +94,8 @@ module.exports = async function (contractId) {
 		});
 		lastSuggestionEndedAt = lastSuggestionEndedAt - 30;
 
-		const lines = breakTextIntoLines(suggestions[i].content, [' '], 400, (text) => obudaBoldFont.widthOfTextAtSize(text, 10));
-		const contentSize = lines.length * 14;
+		const lines = breakTextIntoLines(suggestions[i].content, [' '], 400-margin, (text) => obudaBoldFont.widthOfTextAtSize(text, 10));
+		const contentSize = lines.length * 13;
 
 		pages[suggestionsPageIdx].drawText('Click here for code changes', {
 			size: 15,
