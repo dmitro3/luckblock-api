@@ -52,6 +52,8 @@ fastify.get('/audit/:contractId/status', async (request, reply) => {
 	const status = pending[contractId];
 	const error = errors[contractId];
 
+	console.log(errors);
+
 	if (error) {
 		return reply.send({ error, status: 'errored' });
 	}
