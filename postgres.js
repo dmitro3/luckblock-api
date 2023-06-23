@@ -39,6 +39,9 @@ const ContractAuditIssue = sequelize.define('ContractAuditIssue', {
 	}
 });
 
+ContractAudit.sync();
+ContractAuditIssue.sync();
+
 ContractAudit.hasMany(ContractAuditIssue, {
 	foreignKey: 'issueContractId'
 });
