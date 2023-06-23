@@ -6,7 +6,7 @@ const fontkit = require('@pdf-lib/fontkit');
 const DiffMatchPatch = require('diff-match-patch');
 const dmp = new DiffMatchPatch();
 const { nextStep } = require('../cache');
-const { addCodeDiff } = require('../postgres');
+const { CodeDiff } = require('../postgres');
 
 module.exports = async function (contractId) {
 
@@ -109,7 +109,14 @@ module.exports = async function (contractId) {
 		const diff = dmp.diff_main(suggestions[i].codes[0], suggestions[i].codes[1]);
 
 		const randomId = Math.random().toString(36).substring(2, 15);
-		addCodeDiff(contractId, JSON.stringify({ diff, lhsLabel: 'previous_code.sol', rhsLabel: 'ai_fixed_code.sol' }), randomId);
+		CodeDiff.create({
+			contractId,
+			codeDiff: JSON.stringify({ diff, lhsLabel: 'previous_code.sol', rhsLabel: 'ai_fixed_code.sol' }),
+			codeDiffId: randomId
+		});
+
+		const toEncode = `${contractId}/${randomId}`;
+		const encoded = Buffer.from(toEncode).toString('base64');
 
 		const pdfUrlDict = pdfDoc.context.obj({
 			Type: 'Annot',
@@ -118,7 +125,7 @@ module.exports = async function (contractId) {
 			A: {
 				Type: 'Action',
 				S: 'URI',
-				URI: PDFString.of(`${process.env.DIFF_VIEWER_URL}#${randomId}`),
+				URI: PDFString.of(`${process.env.DIFF_VIEWER_URL}#${encoded}`),
 			}
 		});
 		annots.push(pdfDoc.context.register(pdfUrlDict));
