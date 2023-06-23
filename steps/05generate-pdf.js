@@ -6,7 +6,7 @@ const fontkit = require('@pdf-lib/fontkit');
 const DiffMatchPatch = require('diff-match-patch');
 const dmp = new DiffMatchPatch();
 const { nextStep } = require('../cache');
-const { CodeDiff } = require('../postgres');
+const { ContractAuditIssue } = require('../postgres');
 
 module.exports = async function (contractId) {
 
@@ -108,14 +108,13 @@ module.exports = async function (contractId) {
 
 		const diff = dmp.diff_main(suggestions[i].codes[0], suggestions[i].codes[1]);
 
-		const randomId = Math.random().toString(36).substring(2, 15);
-		CodeDiff.create({
-			contractId,
-			codeDiff: JSON.stringify({ diff, lhsLabel: 'previous_code.sol', rhsLabel: 'ai_fixed_code.sol' }),
-			codeDiffId: randomId
+		const issue = await ContractAuditIssue.create({
+			issueContractId: contractId,
+			issueExplanation: suggestions[i].content,
+			issueCodeDiff: JSON.stringify({ diff, lhsLabel: 'previous_code.sol', rhsLabel: 'ai_fixed_code.sol' })
 		});
 
-		const toEncode = `${contractId}/${randomId}`;
+		const toEncode = `${contractId}/${issue.id}`;
 		const encoded = Buffer.from(toEncode).toString('base64');
 
 		const pdfUrlDict = pdfDoc.context.obj({

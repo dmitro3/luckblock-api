@@ -2,6 +2,7 @@ const fetch = require('node-fetch');
 const { writeFileAsync } = require('../util');
 const { join } = require('path');
 const { nextStep, debugInfo } = require('../cache');
+const { ContractAudit } = require('../postgres');
 
 module.exports = async function (contractId) {
 
@@ -20,6 +21,11 @@ module.exports = async function (contractId) {
 		debugInfo(contractId, 'Contract is not verified');
 		throw new Error('unverified_contract');
 	}
+
+	ContractAudit.create({
+		contractId,
+		contractName: tokenAuditData.token_name
+	}).catch(() => {});
 
 	debugInfo(contractId, 'Contract is verified and token audit data is available');
 
