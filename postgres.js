@@ -26,7 +26,7 @@ const ContractAuditIssue = sequelize.define('ContractAuditIssue', {
 		autoIncrement: true
 	},
 	issueContractId: {
-		type: DataTypes.INTEGER,
+		type: DataTypes.STRING,
 		allowNull: false
 	},
 	issueExplanation: {
