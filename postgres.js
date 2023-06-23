@@ -38,6 +38,14 @@ const ContractAuditIssue = sequelize.define('ContractAuditIssue', {
 	}
 });
 
+ContractAudit.hasMany(ContractAuditIssue, {
+	foreignKey: 'issueContractId'
+});
+
+ContractAuditIssue.belongsTo(ContractAudit, {
+	foreignKey: 'issueContractId'
+});
+
 module.exports = {
 	ContractAudit,
 	ContractAuditIssue

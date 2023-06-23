@@ -1,7 +1,7 @@
 require('dotenv').config();
 
 const { triggerAuditReport } = require('./auditor');
-const { CodeDiff } = require('./postgres');
+const { CodeDiff, ContractAudit, ContractAuditIssue } = require('./postgres');
 let { pending, startsAt, errors } = require('./cache');
 const { existsAsync, readFileAsync, rmAsync } = require('./util');
 const { join } = require('path');
@@ -18,8 +18,13 @@ fastify.post('/audit/:contractId', async (request, reply) => {
 	const { contractId } = request.params;
 
 	const outputExists = await existsAsync(join(process.env.REPORTS_ROOT_DIR, `${contractId}.pdf`));
+	const contractDbExists = (await ContractAudit.count({
+		where: {
+			contractId
+		}
+	})) > 0;
 
-	if (outputExists) {
+	if (outputExists && contractDbExists) {
 		return reply.send({ status: 'ended' });
 	}
 
@@ -44,8 +49,13 @@ fastify.get('/audit/:contractId/status', async (request, reply) => {
 	const { contractId } = request.params;
 
 	const outputExists = await existsAsync(join(process.env.REPORTS_ROOT_DIR, `${contractId}.pdf`));
+	const contractDbExists = (await ContractAudit.count({
+		where: {
+			contractId
+		}
+	})) > 0;
 
-	if (outputExists) {
+	if (outputExists && contractDbExists) {
 		return reply.send({ status: 'ended' });
 	}
 
@@ -75,6 +85,35 @@ fastify.get('/audit/:contractId/pdf', async (request, reply) => {
 	reply.send({
 		status: 'success',
 		pdf: pdfBytes.toString('base64')
+	});
+});
+
+fastify.get('/audit/:contractId/json', async (request, reply) => {
+
+	const { contractId } = request.params;
+
+	const contractDbExists = await ContractAudit.find({
+		where: {
+			contractId
+		},
+		include: ContractAuditIssue
+	});
+	if (!contractDbExists) {
+		return reply.send({ error: 'unknown' });
+	}
+
+	reply.send({
+		status: 'success',
+		data: JSON.stringify({
+			contractId: contractDbExists.contractId,
+			contractName: contractDbExists.contractName,
+			issues: contractDbExists.ContractAuditIssues.map(issue => ({
+				id: issue.id,
+				contractId: issue.contractId,
+				issueExplanation: issue.issueExplanation,
+				issueCodeDiffId: issue.issueCodeDiffId
+			}))
+		})
 	});
 });
 
