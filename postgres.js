@@ -6,7 +6,7 @@ const sequelize = new Sequelize(process.env.PG_DATABASE, process.env.PG_USER, pr
 	sync: { alter: true }
 });
 
-const ContractAudit = sequelize.define('ContractAudit', {
+const ContractAudit = sequelize.define('contract_audit', {
 	contractId: {
 		type: DataTypes.STRING,
 		allowNull: false,
@@ -23,7 +23,7 @@ const ContractAudit = sequelize.define('ContractAudit', {
 	}
 });
 
-const ContractAuditIssue = sequelize.define('ContractAuditIssue', {
+const ContractAuditIssue = sequelize.define('contract_audit_issue', {
 	id: {
 		type: DataTypes.INTEGER,
 		allowNull: false,
