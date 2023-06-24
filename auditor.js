@@ -1,4 +1,5 @@
 const { pending, startsAt, debugInfo, errors } = require('./cache');
+const { ContractAudit } = require('./postgres');
 
 const [
 	cleanUp,
@@ -36,7 +37,18 @@ module.exports.triggerAuditReport = async function (contractId) {
 		.then(chatGPT)
 		.then(extraAudit)
 		.then(generatePDF)
-		.then(() => {
+		.then(async () => {
+
+			const contractAudit = await ContractAudit.findOne({
+				where: {
+					contractId
+				}
+			});
+			if (contractAudit) {
+				contractAudit.update({
+					isProcessed: true
+				});
+			}
 			delete pending[contractId];
 			delete startsAt[contractId];
 			debugInfo(contractId, `Done in ${(Date.now() - startAt) / 1000} seconds`);

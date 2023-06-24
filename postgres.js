@@ -15,6 +15,11 @@ const ContractAudit = sequelize.define('ContractAudit', {
 	contractName: {
 		type: DataTypes.STRING,
 		allowNull: false
+	},
+	isProcessed: {
+		type: DataTypes.BOOLEAN,
+		allowNull: false,
+		defaultValue: false
 	}
 });
 

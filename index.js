@@ -20,7 +20,8 @@ fastify.post('/audit/:contractId', async (request, reply) => {
 	const outputExists = await existsAsync(join(process.env.REPORTS_ROOT_DIR, `${contractId}.pdf`));
 	const contractDbExists = (await ContractAudit.count({
 		where: {
-			contractId
+			contractId,
+			isProcessed: true
 		}
 	})) > 0;
 
@@ -51,7 +52,8 @@ fastify.get('/audit/:contractId/status', async (request, reply) => {
 	const outputExists = await existsAsync(join(process.env.REPORTS_ROOT_DIR, `${contractId}.pdf`));
 	const contractDbExists = (await ContractAudit.count({
 		where: {
-			contractId
+			contractId,
+			isProcessed: true
 		}
 	})) > 0;
 
@@ -111,7 +113,8 @@ fastify.get('/audit/:contractId/json', async (request, reply) => {
 
 	const contractDbExists = await ContractAudit.findOne({
 		where: {
-			contractId
+			contractId,
+			isProcessed: true
 		},
 		include: ContractAuditIssue
 	});
