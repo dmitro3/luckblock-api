@@ -88,6 +88,23 @@ fastify.get('/audit/:contractId/pdf', async (request, reply) => {
 	});
 });
 
+fastify.get('/audit/:contractId/direct-pdf', async (request, reply) => {
+
+	const { contractId } = request.params;
+
+	const outputExists = await existsAsync(join(process.env.REPORTS_ROOT_DIR, `${contractId}.pdf`));
+	if (!outputExists) {
+		return reply.status(404).send({ error: 'unknown' });
+	}
+
+	const pdfBytes = await readFileAsync(join(process.env.REPORTS_ROOT_DIR, `${contractId}.pdf`));
+
+	reply.header('Content-Type', 'application/pdf');
+	reply.header('Content-Disposition', `attachment; filename=${contractId}.pdf`);
+
+	reply.send(pdfBytes);
+});
+
 fastify.get('/audit/:contractId/json', async (request, reply) => {
 
 	const { contractId } = request.params;
