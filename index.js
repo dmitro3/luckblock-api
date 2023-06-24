@@ -127,7 +127,7 @@ fastify.get('/audit/:contractId/json', async (request, reply) => {
 		data: JSON.stringify({
 			contractId: contractDbExists.contractId,
 			contractName: contractDbExists.contractName,
-			issues: contractDbExists.ContractAuditIssues.map(issue => ({
+			issues: contractDbExists.contract_audit_issues.map(issue => ({
 				id: issue.id,
 				contractId: issue.contractId,
 				issueExplanation: issue.issueExplanation,
