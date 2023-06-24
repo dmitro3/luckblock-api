@@ -92,7 +92,7 @@ fastify.get('/audit/:contractId/json', async (request, reply) => {
 
 	const { contractId } = request.params;
 
-	const contractDbExists = await ContractAudit.find({
+	const contractDbExists = await ContractAudit.findOne({
 		where: {
 			contractId
 		},
@@ -121,7 +121,7 @@ fastify.get('/audit/:contractId/diff/:id', async (request, reply) => {
 
 	const { contractId, id } = request.params;
 
-	const codeDiff = await CodeDiff.find({
+	const codeDiff = await CodeDiff.findOne({
 		where: {
 			contractId,
 			id
