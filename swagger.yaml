@@ -108,6 +108,32 @@ paths:
               data:
                 type: object
                 description: The audit report data in JSON format
+                properties:
+                  contractId:
+                    type: string
+                    description: The ID of the audited contract
+                  contractName:
+                    type: string
+                    description: The name of the audited contract
+                  issues:
+                    type: array
+                    description: List of issues found during the audit
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          description: The ID of the issue
+                        contractId:
+                          type: string
+                          description: The ID of the contract where the issue was found
+                        issueExplanation:
+                          type: string
+                          description: Explanation of the issue
+                        issueCodeDiffId:
+                          type: string
+                          description: The ID of the code difference related to the issue (you need to fetch it using /diff/:id)
+
   /audit/{contractId}/diff/{id}:
     get:
       summary: Get code diff
