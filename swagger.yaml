@@ -5,7 +5,7 @@ info:
   description: API for auditing smart contracts
 schemes:
 - https
-host: https://api.miyamotoproject.org/
+host: api.miyamotoproject.org
 basePath: /
 consumes:
 - application/json
