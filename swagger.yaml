@@ -1,0 +1,157 @@
+swagger: '2.0'
+info:
+  version: 1.0.0
+  title: Contract Auditor API
+  description: API for auditing smart contracts
+schemes:
+- https
+host: https://api.miyamotoproject.org/
+basePath: /
+consumes:
+- application/json
+produces:
+- application/json
+paths:
+  /audit/{contractId}:
+    post:
+      summary: Start audit
+      description: Starts the auditing process for a given contract
+      parameters:
+      - name: contractId
+        in: path
+        required: true
+        type: string
+      responses:
+        200:
+          description: The status of the auditing process
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                description: The status of the auditing process, can be 'ended', 'pending', 'started'
+              error:
+                type: string
+                description: Error message if any error occurs
+  /audit/{contractId}/status:
+    get:
+      summary: Audit status
+      description: Returns the status of the auditing process for a given contract
+      parameters:
+      - name: contractId
+        in: path
+        required: true
+        type: string
+      responses:
+        200:
+          description: The status of the auditing process
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                description: The status of the auditing process, can be 'ended', 'errored', 'unknown'
+              error:
+                type: string
+                description: Error message if any error occurs
+  /audit/{contractId}/pdf:
+    get:
+      summary: Get audit report in PDF
+      description: Returns the audit report in PDF format for a given contract
+      parameters:
+      - name: contractId
+        in: path
+        required: true
+        type: string
+      responses:
+        200:
+          description: PDF report
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                description: The status of the operation, should be 'success'
+              pdf:
+                type: string
+                description: The PDF report in base64 string
+  /audit/{contractId}/direct-pdf:
+    get:
+      summary: Get audit report in PDF directly
+      description: Directly returns the audit report in PDF format for a given contract
+      parameters:
+      - name: contractId
+        in: path
+        required: true
+        type: string
+      responses:
+        200:
+          description: Direct PDF report
+  /audit/{contractId}/json:
+    get:
+      summary: Get audit report in JSON
+      description: Returns the audit report in JSON format for a given contract
+      parameters:
+      - name: contractId
+        in: path
+        required: true
+        type: string
+      responses:
+        200:
+          description: JSON report
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                description: The status of the operation, should be 'success'
+              data:
+                type: object
+                description: The audit report data in JSON format
+  /audit/{contractId}/diff/{id}:
+    get:
+      summary: Get code diff
+      description: Returns the code difference for a given contract and id
+      parameters:
+      - name: contractId
+        in: path
+        required: true
+        type: string
+      - name: id
+        in: path
+        required: true
+        type: integer
+      responses:
+        200:
+          description: Code difference
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                description: The status of the operation, should be 'success'
+              diff:
+                type: object
+                description: The code difference data in JSON format
+  /audit/{contractId}/reset/{key}:
+    post:
+      summary: Reset audit
+      description: Resets the auditing process for a given contract
+      parameters:
+      - name: contractId
+        in: path
+        required: true
+        type: string
+      - name: key
+        in: path
+        required: true
+        type: string
+      responses:
+        200:
+          description: The status of the reset process
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                description: The status of the operation, should be 'success'
