@@ -143,7 +143,7 @@ fastify.get('/audit/:contractId/diff/:issueId', async (request, reply) => {
 
 	const issue = await ContractAuditIssue.findOne({
 		where: {
-			contractId,
+			issueContractId: contractId,
 			id: parseInt(issueId)
 		}
 	});
