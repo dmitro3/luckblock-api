@@ -131,7 +131,8 @@ fastify.get('/audit/:contractId/json', async (request, reply) => {
 				id: issue.id,
 				contractId: issue.contractId,
 				issueExplanation: issue.issueExplanation,
-				issueCodeDiffId: issue.issueCodeDiffId
+				issueCodeDiffId: issue.issueCodeDiffId,
+				issueCodeDiffUrl: `${process.env.DIFF_VIEWER_URL}#${Buffer.from(`${contractDbExists.contractId}/${issue.id}`).toString('base64')}`
 			}))
 		})
 	});
