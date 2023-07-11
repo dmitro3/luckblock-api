@@ -1,7 +1,7 @@
 require('dotenv').config();
 
 const { triggerAuditReport } = require('./auditor');
-const { CodeDiff, ContractAudit, ContractAuditIssue } = require('./postgres');
+const { ContractAudit, ContractAuditIssue } = require('./postgres');
 let { pending, startsAt, errors } = require('./cache');
 const { existsAsync, readFileAsync, rmAsync } = require('./util');
 const { join } = require('path');
@@ -131,31 +131,30 @@ fastify.get('/audit/:contractId/json', async (request, reply) => {
 				id: issue.id,
 				contractId: issue.contractId,
 				issueExplanation: issue.issueExplanation,
-				issueCodeDiffId: issue.issueCodeDiffId,
 				issueCodeDiffUrl: `${process.env.DIFF_VIEWER_URL}#${Buffer.from(`${contractDbExists.contractId}/${issue.id}`).toString('base64')}`
 			}))
 		})
 	});
 });
 
-fastify.get('/audit/:contractId/diff/:id', async (request, reply) => {
+fastify.get('/audit/:contractId/diff/:issueId', async (request, reply) => {
 
-	const { contractId, id } = request.params;
+	const { contractId, issueId } = request.params;
 
-	const codeDiff = await CodeDiff.findOne({
+	const issue = await ContractAuditIssue.findOne({
 		where: {
 			contractId,
-			id
+			id: parseInt(issueId)
 		}
 	});
 
-	if (!codeDiff) {
+	if (!issue) {
 		return reply.send({ status: 'unknown' });
 	}
     
 	reply.send({
 		status: 'success',
-		diff: JSON.parse(codeDiff.code_diff)
+		diff: JSON.parse(issue.issueCodeDiff)
 	});
 });
 
