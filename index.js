@@ -116,7 +116,7 @@ fastify.get('/audit/:contractId/direct-pdf', async (request, reply) => {
 	const pdfBytes = await readFileAsync(join(process.env.REPORTS_ROOT_DIR, `${contractId}.pdf`));
 
 	reply.header('Content-Type', 'application/pdf');
-	reply.header('Content-Disposition', `attachment; filename=miyamotoaudit-${contractDbExists.contractName}.pdf`);
+	reply.header('Content-Disposition', `attachment; filename=blockover-${contractDbExists.contractName}.pdf`);
 
 	reply.send(pdfBytes);
 });
