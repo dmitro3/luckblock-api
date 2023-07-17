@@ -33,7 +33,7 @@ module.exports = async function (contractId) {
 	const obudaFont = await pdfDoc.embedFont(obudaFontBytes);
 
 	const topOfPage = 650;
-	const margin = 80;
+	const margin = 90;
 
 	let lastSuggestionEndedAt = topOfPage - 20;
 
