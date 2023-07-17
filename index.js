@@ -191,8 +191,12 @@ fastify.post('/audit/:contractId/reset/:key', async (request, reply) => {
 		await ContractAuditIssue.destroy({
 			where: {}
 		});
-		pending = {};
-		startsAt = {};
+		Object.keys(pending).forEach((key) => {
+			delete pending[key];
+		});
+		Object.keys(startsAt).forEach((key) => {
+			delete startsAt[key];
+		});
 	} else {
 		delete pending[contractId];
 		delete startsAt[contractId];
