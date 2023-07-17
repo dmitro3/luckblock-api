@@ -182,8 +182,12 @@ fastify.post('/audit/:contractId/reset/:key', async (request, reply) => {
 
 	if (contractId === 'all') {
 		rmAsync(process.env.REPORTS_ROOT_DIR, { recursive: true });
-		await ContractAudit.destroy();
-		await ContractAuditIssue.destroy();
+		await ContractAudit.destroy({
+			where: {}
+		});
+		await ContractAuditIssue.destroy({
+			where: {}
+		});
 		pending = {};
 		startsAt = {};
 	} else {
