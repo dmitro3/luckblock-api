@@ -45,8 +45,8 @@ module.exports = async function (contractId) {
 
 	pages[infoPageIdx].drawText(tokenAuditData.token_name, {
 		size: 18,
-		x: 160,
-		y: 292,
+		x: 164,
+		y: 296,
 		maxWidth: 400,
 		lineHeight: 12,
 		font: obudaBoldFont
@@ -55,7 +55,7 @@ module.exports = async function (contractId) {
 	pages[infoPageIdx].drawText(tokenAuditData.token_symbol, {
 		size: 18,
 		x: 180,
-		y: 254,
+		y: 258,
 		maxWidth: 400,
 		lineHeight: 12,
 		font: obudaBoldFont
@@ -63,8 +63,8 @@ module.exports = async function (contractId) {
     
 	pages[infoPageIdx].drawText(contractId, {
 		size: 12,
-		x: 278,
-		y: 215,
+		x: 280,
+		y: 219,
 		maxWidth: 400,
 		lineHeight: 12,
 		font: obudaBoldFont
@@ -245,7 +245,7 @@ module.exports = async function (contractId) {
 			pages[goPlusPagesIdx[i]].drawText(properties[i][j].value, {
 				size: 20,
 				x: margin + 300,
-				y: topOfPage - 50 - j*55,
+				y: topOfPage - 60 - j*55,
 				maxWidth: 400,
 				lineHeight: 12,
 				font: obudaBoldFont,
