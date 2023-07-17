@@ -35,7 +35,7 @@ module.exports = async function (contractId) {
 	const topOfPage = 650;
 	const margin = 80;
 
-	let lastSuggestionEndedAt = topOfPage - 25;
+	let lastSuggestionEndedAt = topOfPage - 20;
 
 	const infoPageIdx = 0;
 	const goPlusPagesIdx = [3,4];
@@ -76,13 +76,13 @@ module.exports = async function (contractId) {
 		pages[suggestionsPageIdx].drawText(`Detection #${i+1}`, {
 			size: 20,
 			x: margin,
-			y: lastSuggestionEndedAt - 35,
+			y: lastSuggestionEndedAt - 30,
 			maxWidth: 400,
 			lineHeight: 12,
 			font: obudaBoldFont,
 			color: rgb(...[0, 24, 122].map((e) => e / 255))
 		});
-		lastSuggestionEndedAt = lastSuggestionEndedAt - 25;
+		lastSuggestionEndedAt = lastSuggestionEndedAt - 30;
 
 		pages[suggestionsPageIdx].drawText(suggestions[i].content, {
 			size: 10,
