@@ -182,6 +182,8 @@ fastify.post('/audit/:contractId/reset/:key', async (request, reply) => {
 
 	if (contractId === 'all') {
 		rmAsync(process.env.REPORTS_ROOT_DIR, { recursive: true });
+		await ContractAudit.destroy();
+		await ContractAuditIssue.destroy();
 		pending = {};
 		startsAt = {};
 	} else {
@@ -189,6 +191,16 @@ fastify.post('/audit/:contractId/reset/:key', async (request, reply) => {
 		delete startsAt[contractId];
 		if (await existsAsync(join(process.env.REPORTS_ROOT_DIR, `${contractId}.pdf`))) {
 			rmAsync(join(process.env.REPORTS_ROOT_DIR, `${contractId}.pdf`));
+			await ContractAudit.destroy({
+				where: {
+					contractId
+				}
+			});
+			await ContractAuditIssue.destroy({
+				where: {
+					issueContractId: contractId
+				}
+			});
 		} else {
 			return reply.send({ status: 'unknown' });
 		}
