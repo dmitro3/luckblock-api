@@ -46,7 +46,7 @@ module.exports = async function (contractId) {
 	pages[infoPageIdx].drawText(tokenAuditData.token_name, {
 		size: 18,
 		x: 160,
-		y: 301,
+		y: 292,
 		maxWidth: 400,
 		lineHeight: 12,
 		font: obudaBoldFont
@@ -55,7 +55,7 @@ module.exports = async function (contractId) {
 	pages[infoPageIdx].drawText(tokenAuditData.token_symbol, {
 		size: 18,
 		x: 180,
-		y: 262,
+		y: 254,
 		maxWidth: 400,
 		lineHeight: 12,
 		font: obudaBoldFont
@@ -63,8 +63,8 @@ module.exports = async function (contractId) {
     
 	pages[infoPageIdx].drawText(contractId, {
 		size: 12,
-		x: 270,
-		y: 223,
+		x: 278,
+		y: 215,
 		maxWidth: 400,
 		lineHeight: 12,
 		font: obudaBoldFont
@@ -76,23 +76,23 @@ module.exports = async function (contractId) {
 		pages[suggestionsPageIdx].drawText(`Detection #${i+1}`, {
 			size: 20,
 			x: margin,
-			y: lastSuggestionEndedAt - 40,
+			y: lastSuggestionEndedAt - 25,
 			maxWidth: 400,
 			lineHeight: 12,
 			font: obudaBoldFont,
 			color: rgb(...[0, 24, 122].map((e) => e / 255))
 		});
-		lastSuggestionEndedAt = lastSuggestionEndedAt - 40;
+		lastSuggestionEndedAt = lastSuggestionEndedAt - 25;
 
 		pages[suggestionsPageIdx].drawText(suggestions[i].content, {
 			size: 10,
 			x: margin,
-			y: lastSuggestionEndedAt - 30,
+			y: lastSuggestionEndedAt - 20,
 			maxWidth: 400,
 			lineHeight: 12,
 			font: obudaFont
 		});
-		lastSuggestionEndedAt = lastSuggestionEndedAt - 30;
+		lastSuggestionEndedAt = lastSuggestionEndedAt - 20;
 
 		const lines = breakTextIntoLines(suggestions[i].content, [' '], 400-margin, (text) => obudaBoldFont.widthOfTextAtSize(text, 10));
 		const contentSize = lines.length * 13;
@@ -237,7 +237,7 @@ module.exports = async function (contractId) {
 			pages[goPlusPagesIdx[i]].drawText(properties[i][j].label, {
 				size: 20,
 				x: margin,
-				y: topOfPage - 50 - j*55,
+				y: topOfPage - 60 - j*55,
 				maxWidth: 400,
 				lineHeight: 12,
 				font: obudaBoldFont,
