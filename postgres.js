@@ -44,8 +44,27 @@ const ContractAuditIssue = sequelize.define('contract_audit_issue', {
 	}
 });
 
+const RegisteredAddresses = sequelize.define('registered_addresses', {
+	id: {
+		type: DataTypes.INTEGER,
+		allowNull: false,
+		primaryKey: true,
+		autoIncrement: true
+	},
+	address: {
+		type: DataTypes.STRING,
+		allowNull: false
+	},
+	createdAt: {
+		type: DataTypes.DATE,
+		allowNull: false,
+		defaultValue: DataTypes.NOW
+	}
+});
+
 ContractAudit.sync();
 ContractAuditIssue.sync();
+RegisteredAddresses.sync();
 
 ContractAudit.hasMany(ContractAuditIssue, {
 	foreignKey: 'issueContractId'
@@ -57,5 +76,6 @@ ContractAuditIssue.belongsTo(ContractAudit, {
 
 module.exports = {
 	ContractAudit,
-	ContractAuditIssue
+	ContractAuditIssue,
+	RegisteredAddresses
 };

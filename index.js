@@ -1,7 +1,7 @@
 require('dotenv').config();
 
 const { triggerAuditReport } = require('./auditor');
-const { ContractAudit, ContractAuditIssue } = require('./postgres');
+const { ContractAudit, ContractAuditIssue, RegisteredAddresses } = require('./postgres');
 let { pending, startsAt, errors } = require('./cache');
 const { existsAsync, readFileAsync, rmAsync } = require('./util');
 const { join } = require('path');
@@ -216,6 +216,18 @@ fastify.post('/audit/:contractId/reset/:key', async (request, reply) => {
 			return reply.send({ status: 'unknown' });
 		}
 	}
+
+	reply.send({ status: 'success' });
+
+});
+
+fastify.post('/register/:address', async (request, reply) => {
+
+	const { address } = request.params;
+
+	RegisteredAddresses.create({
+		address
+	});
 
 	reply.send({ status: 'success' });
 
