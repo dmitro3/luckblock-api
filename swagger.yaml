@@ -5,7 +5,7 @@ info:
   description: API for auditing smart contracts
 schemes:
 - https
-host: api.miyamotoproject.org
+host: api.luckblock.io
 basePath: /
 consumes:
 - application/json
